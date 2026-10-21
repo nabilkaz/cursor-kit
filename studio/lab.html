@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cursor Designer — Cursor Kit</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<style>
+:root{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#2a2f29;background:#f7f6f0;--line:#28342122;--green:#446835}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button,a{cursor:pointer}button{border:1px solid var(--line);border-radius:7px;background:#fffefa;padding:9px 12px;color:inherit;min-height:40px}button[aria-pressed=true],.primary{background:#293329;color:#fff}button:hover{filter:brightness(.97)}:focus-visible{outline:3px solid #8caa72;outline-offset:3px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 30px;border-bottom:1px solid var(--line)}header a{color:inherit;text-decoration:none}header strong{font-weight:600}main{max-width:1350px;margin:auto;padding:28px 30px}h1{font:36px/1.1 Georgia,serif;letter-spacing:-1px;margin:0 0 10px}p{color:#6c7567;margin:0 0 22px}h2{font-size:13px;margin:0 0 16px;font-weight:600}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:28px}.preview{position:sticky;top:20px;align-self:start}.stage{position:relative;height:360px;background:radial-gradient(#a2af9338 .8px,transparent .8px) 0 0/20px 20px #fffdf8;border:1px solid var(--line);border-radius:12px;overflow:hidden}cursor-theatre{position:absolute;inset:0}.guide{position:absolute;inset:0;pointer-events:none}.guide:before{content:'';position:absolute;left:var(--gx,50%);top:0;bottom:0;border-left:1px dashed #9baa854b}.guide:after{content:'';position:absolute;top:var(--gy,50%);left:0;right:0;border-top:1px dashed #9baa854b}.stage-label{position:absolute;left:18px;top:15px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#7e8776}.tools{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tools button{flex:1}.tools label{display:flex;align-items:center;gap:8px;font-size:12px}.directions{display:flex;gap:6px;margin-bottom:14px}.directions button{flex:1}.panel{border-top:1px solid var(--line);padding:22px 0}.panel:first-child{padding-top:0;border:0}label.field{display:grid;gap:7px;margin-bottom:14px;font-size:12px}select,textarea{width:100%;background:#fffefa;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:16px;color:inherit}textarea{resize:vertical;min-height:86px}.range{margin:0 0 14px}.range label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}.range output{color:#717b69;font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--green)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choices{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.choices button{font-size:12px}.hint{font-size:12px;color:#717b69;margin:10px 0 0;line-height:1.5}.below{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}.status{min-height:20px;color:var(--green);font-size:12px;margin-top:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}.caption{display:flex;justify-content:space-between;gap:20px;font-size:12px;color:#6c7567;margin-top:12px}.stage[data-bounds=true] cursor-theatre{outline:1px solid #8d9c7466;outline-offset:-9px}.small{font-size:12px}.stack{display:grid;gap:10px}@media(max-width:850px){main{padding:24px 18px}.layout{grid-template-columns:1fr}.preview{position:relative;top:auto}.controls{display:grid;grid-template-columns:1fr 1fr;gap:24px}.panel{border:0}.panel:first-child{padding-top:22px}header{padding:18px}.stage{height:320px}}@media(max-width:500px){.controls{grid-template-columns:1fr}.choices{grid-template-columns:1fr 1fr}h1{font-size:30px}.stage{height:290px}.caption{display:block}}
+
+input[type=number]{width:76px;min-height:36px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fffefa;color:inherit;font:inherit;font-variant-numeric:tabular-nums}.range label{align-items:center}.range .value{display:flex;align-items:center;gap:5px;color:#717b69}.pose-panel{background:#efeee7;border:1px solid var(--line)!important;border-radius:10px;padding:18px!important;margin-bottom:22px}.corner-picker{display:grid;grid-template-columns:44px 44px;gap:12px;width:max-content;padding:12px;background:#c6c3df;border-radius:16px;margin:8px 0 18px}.corner-picker button{padding:8px;min-height:40px}.corner-picker svg{display:block;width:20px;height:20px}.padding-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 22px}.padding-grid label{display:flex;align-items:center;justify-content:space-between;font-size:12px}.padding-grid input{width:62px}.padding-head{display:flex;justify-content:space-between;align-items:center}.padding-head button{font-size:12px}.mirror{width:100%;margin-top:12px}#reveals{grid-template-columns:repeat(3,1fr)}
+
+.cursor-library{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px;background:#fffefa}.cursor-library label.field{margin-bottom:8px}.cursor-library select{background:#f7f6f0}.cursor-library summary{cursor:pointer;font-size:12px;margin-top:12px}.cursor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:220px;overflow:auto;padding-top:12px}.cursor-choice{height:56px;padding:5px;display:grid;place-items:center;position:relative}.cursor-choice .sprite-window{overflow:hidden}.cursor-choice img{display:block;max-width:none}.cursor-choice svg{width:28px;height:28px}.cursor-choice[aria-pressed=true]{background:#e0e6d8;color:#263324;outline:2px solid #56764b;outline-offset:-2px}.cursor-choice .sprite-strip{animation:none}.cursor-library .hint{margin-top:7px}.cursor-source{font-size:11px;color:#66775c;margin:0}.cursor-behavior{font-size:12px;display:flex;gap:8px;align-items:center;margin-top:10px}
+</style><link rel="stylesheet" href="tools-ui.css?v=22">
+<header><a href="index.html">← Cursor Kit</a><strong>Anatomy & motion lab</strong><button id="save" class="primary">Apply to scenes</button></header>
+<main><h1>One cursor. Every detail.</h1><p>Shape the dialogue, give each direction its own placement, and compare how a turn feels.</p>
+<div class="layout"><section class="preview" aria-label="Live anatomy preview">
+<section class="cursor-library" aria-label="Cursor library"><label class="field">Cursor type<select id="cursor-type"></select></label><label class="cursor-behavior"><input type="checkbox" id="cursor-motion" checked> Animate cursor behavior</label><div class="cursor-grid" id="cursor-grid" role="group" aria-label="Cursor shapes"></div></section>
+<div class="directions" aria-label="Cursor direction"><button data-dir="left" aria-pressed="true">← Left</button><button data-dir="right" aria-pressed="false">Right →</button><button data-dir="up" aria-pressed="false">↑ Up</button><button data-dir="down" aria-pressed="false">↓ Down</button></div>
+<div class="stage" id="stage"><div class="guide" id="guide"></div><span class="stage-label">Actual size · live preview</span><cursor-theatre id="actor"></cursor-theatre></div>
+<div class="tools"><label><input type="checkbox" id="compare" checked> Overlay opposite pose</label></div>
+<div class="tools"><button id="text-play">Replay text</button><label><input type="checkbox" id="guides" checked> Guides</label></div>
+<div class="range"><label for="scrub">Text progress <output id="scrub-value">100%</output></label><input type="range" id="scrub" min="0" max="100" value="100" step="0.1"></div>
+<div class="below"><h2>Text entrance</h2><div class="choices" id="reveals"><button data-reveal="typing" aria-pressed="true">Typed</button><button data-reveal="words" aria-pressed="false">Word by word</button><button data-reveal="fade" aria-pressed="false">Whole message</button></div><p class="hint" id="reveal-note">Letters arrive with a light touch. Best for a conversational feel.</p></div>
+<div class="below"><h2>Direction change</h2><div class="choices" id="turns"><button data-turn="snap" aria-pressed="false">Instant</button><button data-turn="rotate" aria-pressed="true">Pivot</button><button data-turn="fold" aria-pressed="false">Edge flip</button><button data-turn="dissolve" aria-pressed="false">Fade through</button></div><p class="hint" id="turn-note">A short, deliberate rotation. Keeps the pointer visible throughout.</p></div>
+<p class="status" id="status" role="status"></p><div class="actions"><button id="download">Download design settings</button><button id="reset">Reset design</button></div>
+</section>
+<aside class="controls" aria-label="Design controls"><section class="panel pose-panel"><h2 id="placement-title">Pose · left</h2><div id="angle-controls"></div><label class="field">Anchor relative to cursor<select id="anchor"><option value="0,0">Below / right</option><option value="1,0">Below / left</option><option value="0,1">Above / right</option><option value="1,1">Above / left</option></select></label><div class="small">Sharp dialogue corner</div><div class="corner-picker" role="group" aria-label="Sharp dialogue corner"><button data-corner="tl" aria-label="Top left" title="Top left" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M17 3H3V17" fill="none" stroke="currentColor" stroke-width="2"/></svg></button><button data-corner="tr" aria-label="Top right" title="Top right" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3H17V17" fill="none" stroke="currentColor" stroke-width="2"/></svg></button><button data-corner="bl" aria-label="Bottom left" title="Bottom left" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3V17H17" fill="none" stroke="currentColor" stroke-width="2"/></svg></button><button data-corner="br" aria-label="Bottom right" title="Bottom right" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M17 3V17H3" fill="none" stroke="currentColor" stroke-width="2"/></svg></button></div><div id="offsets"></div><p class="hint">Offsets run from the cursor center to the chosen dialogue anchor. Positive values move outward; negative values cross the center. Mirroring keeps these distances unchanged.</p><button class="mirror" id="mirror">Mirror to right →</button></section>
+<section class="panel"><h2>Dialogue content</h2><label class="field">Try a content case<select id="sample"><option value="normal">Conversational</option><option value="short">Very short</option><option value="long">Long message</option><option value="emoji">Emoji & punctuation</option><option value="empty">No dialogue</option></select></label><label class="field">Your text<textarea id="text" maxlength="240">Hey. What are we making?</textarea></label><label class="field">Stage position<select id="position"><option value="center">Center</option><option value="left">Near left edge</option><option value="right">Near right edge</option><option value="top">Near top edge</option><option value="bottom">Near bottom edge</option></select></label></section>
+
+<section class="panel"><h2>Dialogue shape</h2><div class="padding-head"><span class="small">Padding</span><button id="padding-link" aria-pressed="false">Unlinked</button></div><div class="padding-grid"><label>Top<input id="padding-top" type="number" min="0" max="64" aria-label="Top padding"></label><label>Right<input id="padding-right" type="number" min="0" max="64" aria-label="Right padding"></label><label>Bottom<input id="padding-bottom" type="number" min="0" max="64" aria-label="Bottom padding"></label><label>Left<input id="padding-left" type="number" min="0" max="64" aria-label="Left padding"></label></div><div id="shape-controls"></div><p class="hint">Minimum width 0 hugs short text. Maximum width controls when long messages wrap.</p></section>
+<section class="panel"><h2>Timing</h2><div id="timing-controls"></div><p class="hint">Reduced-motion preferences skip transitions. Scrubbing still lets you inspect the poses.</p></section>
+</aside></div></main>
+<script src="cursor-theatre.js?v=23"></script>
+<script>
+const $=id=>document.getElementById(id),actor=$('actor');
+const defaults=JSON.parse(JSON.stringify(actor.settings.design));let design=JSON.parse(JSON.stringify(defaults));
+try{const saved=JSON.parse(localStorage.getItem('cursor-design'));if(saved)design={...defaults,...saved,placements:{...defaults.placements,...saved.placements}}}catch{}
+for(const dir of Object.keys(defaults.placements))design.placements[dir]={...defaults.placements[dir],...design.placements[dir]};
+function normalizeDesign(){design.padding={top:design.paddingY,right:design.paddingX,bottom:design.paddingY,left:design.paddingX,...design.padding};if(design.reveal==='rise')design.reveal='fade'}
+normalizeDesign();
+let pressed=false;
+let playing=false;
+let direction='left',progress=1,frame,pose={x:.5,y:.5},from=null,turnProgress=1;
+const samples={normal:'Hey. What are we making?',short:'Yes!',long:'I think we’re onto something. Let’s try moving this over to the other side and see how it feels.',emoji:'Oh! That worked ✨ 👩🏽‍💻',empty:''};
+const notes={typing:'Letters arrive with a light touch. Best for a conversational feel.',words:'Words arrive as readable units. Good for a brisk exchange.',fade:'The complete message fades in together. Quiet, clear, and quick.'};
+const turnNotes={snap:'An immediate pose change. Precise, but deliberately abrupt.',rotate:'A short, deliberate rotation. Keeps the pointer visible throughout.',fold:'The pointer narrows to an edge, changes direction, then opens. A playful flip.',dissolve:'The old pose fades away and the new one appears. Soft, without spinning.'};
+function draw(){document.querySelectorAll('[data-stage-position]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.stagePosition===$('position').value));actor.configure({design});actor.inspect({direction,progress,progressMode:'reveal',text:$('text').value,...pose,from,turnProgress,compare:$('compare').checked,pressed});$('scrub').value=progress*100;$('scrub-value').textContent=(progress*design.revealMs/1000).toFixed(2)+' / '+(design.revealMs/1000).toFixed(2)+' s';$('scrub').setAttribute('aria-valuetext',$('scrub-value').textContent);$('scrub').closest('.range').style.setProperty('--progress',progress*100+'%');document.querySelectorAll('[data-tick]').forEach(t=>t.textContent=(Number(t.dataset.tick)*design.revealMs/1000).toFixed(2)+'s');const clip=document.getElementById('text-timeline-clip');if(clip)clip.textContent=$('text').value||'No dialogue';$('guide').style.setProperty('--gx',`calc(${pose.x*100}% + 14px)`);$('guide').style.setProperty('--gy',`calc(${pose.y*100}% + 14px)`);placeDialogueEditor();}
+
+function slider(target,id,label,min,max,value,onChange,unit='px'){
+ const wrap=document.createElement('div');wrap.className='range';
+ wrap.innerHTML=`<label for="${id}">${label}<span class="value"><input id="${id}-number" aria-label="${label} value" type="number" min="${min}" max="${max}" step="1" value="${value}"><span>${unit}</span></span></label><input id="${id}" aria-label="${label} slider" type="range" min="${min}" max="${max}" value="${value}">`;
+ $(target).append(wrap);
+ const update=e=>{if(e.target.value==='')return;const v=Math.min(max,Math.max(min,Number(e.target.value)));if(!Number.isFinite(v))return;$(id).value=v;if(e.target.id===id)$(id+'-number').value=v;onChange(v);draw()};
+ $(id).oninput=update;$(id+'-number').oninput=update;$(id+'-number').onchange=()=>{$(id+'-number').value=$(id).value};
+}
+const opposite={left:'right',right:'left',up:'down',down:'up'};
+function syncPadding(){for(const side of ['top','right','bottom','left'])$('padding-'+side).value=design.padding[side];$('padding-link').setAttribute('aria-pressed',!!design.paddingLinked);$('padding-link').textContent=design.paddingLinked?'Linked ⛓':'Unlinked';$('padding-link').setAttribute('aria-label',design.paddingLinked?'Unlink padding sides':'Link all padding sides')}
+function sync(){
+ $('cursor-type').value=design.cursorType||'theatre';$('cursor-motion').checked=design.cursorMotion!==false;
+ const selected=actor.cursorTypes.find(c=>c.id===$('cursor-type').value)||actor.cursorTypes[0];
+ document.querySelectorAll('[data-cursor-choice]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cursorChoice===selected.id));
+
+ document.querySelectorAll('[data-dir]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.dir===direction));
+ document.querySelectorAll('[data-reveal]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.reveal===design.reveal));
+ document.querySelectorAll('[data-turn]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.turn===design.turnStyle));
+ $('reveal-note').textContent=notes[design.reveal];$('turn-note').textContent=turnNotes[design.turnStyle];
+ $('placement-title').textContent='Pose · '+direction;const p=design.placements[direction];$('anchor').value=p.ax+','+p.ay;document.querySelectorAll('[data-corner]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.corner===p.corner));$('mirror').textContent='Mirror to '+opposite[direction]+' '+({left:'←',right:'→',up:'↑',down:'↓'}[opposite[direction]]);syncPadding();
+ $('angle-controls').replaceChildren();slider('angle-controls','angle','Cursor rotation',-180,360,p.angle,v=>p.angle=v,'°');
+ const canRotate=['theatre','white-arrow','help-pointer','drag-link'].includes(design.cursorType||'theatre');$('angle').disabled=!canRotate;$('angle-number').disabled=!canRotate;
+ $('offsets').replaceChildren();positionField('x',p);positionField('y',p);
+ $('shape-controls').replaceChildren();for(const [id,label,min,max]of [['maxWidth','Maximum width',100,360],['minWidth','Minimum width',0,180],['radius','Corner radius',0,40],['fontSize','Text size',12,22]])slider('shape-controls',id,label,min,max,design[id],v=>design[id]=v);
+ $('timing-controls').replaceChildren();slider('timing-controls','revealMs','Text entrance',100,1800,design.revealMs,v=>design.revealMs=v,'ms');slider('timing-controls','turnMs','Direction transition',80,600,design.turnMs,v=>design.turnMs=v,'ms');draw();
+}
+function stopPreview(){cancelAnimationFrame(frame);playing=false;$('text-play').textContent='Play'}
+function animate(kind){stopPreview();const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(kind==='turn'){from=direction;direction={left:'right',right:'left',up:'down',down:'up'}[direction];progress=1;turnProgress=0;sync()}else{from=null;turnProgress=1;if(progress>=1)progress=0;playing=true;$('text-play').textContent='Pause'}
+ const duration=kind==='turn'?design.turnMs:design.revealMs,initial=kind==='turn'?0:progress,start=performance.now()-initial*duration;
+ function tick(now){const u=reduced?1:Math.min(1,(now-start)/duration);if(kind==='turn')turnProgress=u;else progress=u;draw();if(u<1)frame=requestAnimationFrame(tick);else{from=null;playing=false;$('text-play').textContent='Play';draw()}}frame=requestAnimationFrame(tick);
+}
+document.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{stopPreview();from=null;turnProgress=1;progress=1;direction=b.dataset.dir;sync()});
+document.querySelectorAll('[data-reveal]').forEach(b=>b.onclick=()=>{design.reveal=b.dataset.reveal;sync();progress=0;animate('text')});
+document.querySelectorAll('[data-turn]').forEach(b=>b.onclick=()=>{design.turnStyle=b.dataset.turn;sync();animate('turn')});
+document.querySelectorAll('[data-corner]').forEach(b=>b.onclick=()=>{design.placements[direction].corner=b.dataset.corner;sync()});
+$('mirror').onclick=()=>{stopPreview();actor.configure({design});const target=opposite[direction];design.placements[target]=actor.mirroredPlacement(direction);direction=target;from=null;turnProgress=1;$('compare').checked=true;sync();$('status').textContent='Mirrored around the cursor center. Spacing is identical on both sides.'};
+$('compare').onchange=()=>{if($('compare').checked){pose={x:.5,y:.5};$('position').value='center'}draw()};
+$('padding-link').onclick=()=>{design.paddingLinked=!design.paddingLinked;if(design.paddingLinked)for(const side of Object.keys(design.padding))design.padding[side]=design.padding.top;syncPadding();draw()};
+for(const side of ['top','right','bottom','left']){const input=$('padding-'+side);input.oninput=()=>{if(input.value==='')return;const v=Math.max(0,Math.min(64,Number(input.value)));if(!Number.isFinite(v))return;design.padding[side]=v;if(design.paddingLinked){for(const key of Object.keys(design.padding))design.padding[key]=v;for(const key of Object.keys(design.padding))if(key!==side)$('padding-'+key).value=v}draw()};input.onchange=()=>syncPadding()}
+
+$('anchor').onchange=e=>{const [ax,ay]=e.target.value.split(',').map(Number);Object.assign(design.placements[direction],{ax,ay});sync()};
+$('sample').onchange=e=>{$('text').value=samples[e.target.value];animate('text')};$('text').oninput=()=>{stopPreview();progress=1;draw()};
+$('position').onchange=e=>{pose={center:{x:.5,y:.5},left:{x:.06,y:.5},right:{x:.93,y:.5},top:{x:.5,y:.08},bottom:{x:.5,y:.90},'top-left':{x:.06,y:.08},'top-right':{x:.93,y:.08},'bottom-left':{x:.06,y:.90},'bottom-right':{x:.93,y:.90}}[e.target.value];draw()};
+$('scrub').oninput=e=>{stopPreview();progress=e.target.value/100;draw()};$('text-play').onclick=()=>{if(playing)stopPreview();else animate('text')};$('guides').onchange=e=>$('guide').hidden=!e.target.checked;
+$('save').onclick=()=>{try{localStorage.setItem('cursor-design',JSON.stringify(design));$('status').textContent='Saved. Your design is ready in Scene Editor and its exports.'}catch{$('status').textContent='This browser could not save locally. Download the settings to keep them.'}};
+$('download').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({design},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='cursor-design.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('reset').onclick=()=>{stopPreview();design=JSON.parse(JSON.stringify(defaults));normalizeDesign();progress=1;from=null;turnProgress=1;sync();$('status').textContent='Preview reset. Apply to scenes to replace saved settings.'};
+const groups={};
+for(const type of actor.cursorTypes){
+ if(!groups[type.source]){groups[type.source]=document.createElement('optgroup');groups[type.source].label=type.source;$('cursor-type').append(groups[type.source])}
+ const option=document.createElement('option');option.value=type.id;option.textContent=type.label;groups[type.source].append(option);
+ const button=document.createElement('button');button.className='cursor-choice';button.dataset.cursorChoice=type.id;button.title=type.label;button.setAttribute('aria-label',type.label);button.innerHTML=actor.cursorMarkup(type);button.onclick=()=>selectCursor(type.id);$('cursor-grid').append(button);
+}
+function selectCursor(id){stopPreview();design.cursorType=id;pressed=false;from=null;turnProgress=1;sync()}
+$('cursor-type').onchange=e=>selectCursor(e.target.value);
+$('cursor-motion').onchange=e=>{design.cursorMotion=e.target.checked;draw()};
+
+$('stage').onpointerdown=e=>{if(e.target.closest('button,textarea'))return;if(['openhand','closedhand'].includes(design.cursorType)){pressed=true;$('stage').setPointerCapture(e.pointerId);draw()}};
+$('stage').onpointerup=$('stage').onpointercancel=()=>{pressed=false;draw()};
+
+function positionField(axis,p){
+ const label=document.createElement('label');label.className='position-field';
+ const handle=document.createElement('span');handle.textContent=axis.toUpperCase();handle.title='Drag to adjust '+axis.toUpperCase();
+ const input=document.createElement('input');input.type='number';input.step='1';input.value=Math.round(p[axis]-14);input.setAttribute('aria-label','Dialogue position '+axis.toUpperCase());
+ label.append(handle,input);$('offsets').append(label);
+ const update=v=>{if(!Number.isFinite(v))return;p[axis]=14+v;input.value=v;draw()};
+ input.oninput=()=>{if(input.value!=='')update(Number(input.value))};
+ let drag=null;
+ handle.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();drag={x:e.clientX,value:Number(input.value)};handle.setPointerCapture(e.pointerId)};
+ handle.onpointermove=e=>{if(drag)update(Math.round(drag.value+(e.clientX-drag.x)*(e.shiftKey?.1:1)))};
+ handle.onpointerup=()=>drag=null;handle.onpointercancel=()=>{if(drag)update(drag.value);drag=null};
+}
+let dialogueEditor=null;
+const dialogueHit=document.createElement('button');dialogueHit.className='dialogue-hit';dialogueHit.setAttribute('aria-label','Edit dialogue on canvas');dialogueHit.title='Edit dialogue';$('stage').append(dialogueHit);
+function placeDialogueEditor(){
+ const bubble=actor.shadowRoot.querySelector('.actor:not(.ghost) .bubble')||actor.shadowRoot.querySelector('.bubble');if(!bubble)return;
+ const r=bubble.getBoundingClientRect(),stage=$('stage').getBoundingClientRect();
+ const empty=!$('text').value.trim();
+ Object.assign(dialogueHit.style,{left:(empty?stage.width/2:r.left-stage.left)+'px',top:(empty?stage.height/2+30:r.top-stage.top)+'px',width:(empty?130:r.width)+'px',height:(empty?36:r.height)+'px'});
+ dialogueHit.textContent=empty?'Add dialogue':'';dialogueHit.classList.toggle('empty',empty);
+ if(dialogueEditor)Object.assign(dialogueEditor.style,{left:Math.max(8,Math.min(stage.width-256,r.left-stage.left))+'px',top:Math.max(8,Math.min(stage.height-90,r.top-stage.top))+'px'});
+}
+dialogueHit.onclick=()=>{
+ if(dialogueEditor)return;stopPreview();progress=1;draw();
+ const input=document.createElement('textarea');dialogueEditor=input;input.className='designer-dialogue-editor';input.maxLength=240;input.value=$('text').value;input.setAttribute('aria-label','Dialogue text');input.placeholder='Say something…';input.title='Enter to save · Escape to cancel';$('stage').append(input);placeDialogueEditor();input.focus();
+ const finish=save=>{if(dialogueEditor!==input)return;if(save)$('text').value=input.value.trim();dialogueEditor=null;input.remove();draw();dialogueHit.focus()};
+ input.onkeydown=e=>{if(e.isComposing)return;if(e.key==='Escape'){e.preventDefault();finish(false)}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finish(true)}};
+ input.onblur=()=>finish(true);
+};
+new ResizeObserver(()=>draw()).observe($('stage'));
+
+sync();
+</script></html>
+
+<script src="tools-ui.js?v=22"></script>

@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.tgz
+assets/fonts/*
+!assets/fonts/.gitkeep
+studio/index.html
+studio/cursor-theatre.js

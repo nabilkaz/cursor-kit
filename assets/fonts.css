@@ -1,0 +1,6 @@
+@font-face{font-family:Timeless;src:local('Timeless Sans Grotesk Regular'),url('./fonts/TimelessSans-GroteskRegular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:Timeless;src:local('Timeless Sans Grotesk Medium'),url('./fonts/TimelessSans-GroteskMedium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:Timeless;src:local('Timeless Sans Grotesk Semibold'),url('./fonts/TimelessSans-GroteskSemibold.woff2') format('woff2');font-weight:600 900;font-display:swap}
+html body,html body.tool-app{font-family:Timeless,system-ui,sans-serif}
+button,input,select,textarea{font-family:inherit}
+cursor-theatre{--cursor-font:Timeless,system-ui,sans-serif}
