@@ -2,7 +2,7 @@ export type Scene = 'entrance' | 'elated' | 'frustrated' | 'shy' | 'switch' | 'c
 export type Direction = 'left' | 'right' | 'up' | 'down';
 export interface Placement { x:number; y:number; ax:0|1; ay:0|1; angle:number; corner:'tl'|'tr'|'bl'|'br' }
 export interface Design {
-  cursorType?:string; cursorMotion?:boolean; reveal?:'typing'|'words'|'fade'; revealMs?:number;
+  cursorType?:string; cursorMotion?:boolean; autoFlip?:boolean; reveal?:'typing'|'words'|'fade'; revealMs?:number;
   turnStyle?:'snap'|'rotate'|'fold'|'dissolve'; turnMs?:number;
   paddingX?:number; paddingY?:number; maxWidth?:number; minWidth?:number; radius?:number; fontSize?:number;
   placements?:Partial<Record<Direction, Placement>>;

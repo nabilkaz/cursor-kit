@@ -4,7 +4,7 @@ Use Cursor Kit to add an expressive cursor demonstration to the current project.
 
 ## Bring in the library
 
-Use an existing checkout of `nabilkaz/cursor-kit`, or clone it with the user's authenticated GitHub account. This repository is private; anonymous raw/CDN links do not work. It is not published to the npm registry.
+Clone `https://github.com/nabilkaz/cursor-kit.git` or use an existing checkout. It is not published to the npm registry.
 
 With GitHub CLI authenticated, get the source with `gh repo clone nabilkaz/cursor-kit`.
 

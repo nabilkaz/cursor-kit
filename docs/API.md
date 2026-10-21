@@ -50,3 +50,5 @@ Use the Scene Editor for paths, nodes, timing, and dialogue. Export produces a s
 - Include `title`, `caption`, `mood`, and four `beats`. Keep keyframe times ordered and duration positive.
 
 Use `play()` for custom data; `playMoment()` uses built-in preset ranges. The font of exported performances defaults to the host system unless the host supplies `--cursor-font` and its own licensed font loading.
+
+Dialogue measures the full message before revealing text. By default, `design.autoFlip` mirrors the cursor and bubble together when the authored placement overflows the stage, and holds that orientation for the message. Measurements use stage coordinates, including inside CSS-scaled slides. A resized stage or changed message geometry triggers a new fit. Set `autoFlip:false` to keep the authored orientation.

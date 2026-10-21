@@ -263,7 +263,7 @@ That artwork remains under Apache-2.0, reproduced below.
     constructor() {
       super();
       this.attachShadow({mode:'open'});
-      this.settings = {scene:'switch', speed:1, energy:1, arc:1, trails:false, dialogue:true, customLine:'', design:{cursorType:'theatre',cursorMotion:true,paddingX:16,paddingY:11,maxWidth:220,minWidth:0,radius:23,fontSize:13,reveal:'typing',revealMs:850,turnStyle:'rotate',turnMs:180,placements:{left:{x:25,y:28,ax:0,ay:0,angle:0,corner:'tl'},right:{x:-8,y:-5,ax:1,ay:1,angle:90,corner:'br'},up:{x:25,y:28,ax:0,ay:0,angle:45,corner:'tl'},down:{x:25,y:-8,ax:0,ay:1,angle:225,corner:'bl'}}}};
+      this.settings = {scene:'switch', speed:1, energy:1, arc:1, trails:false, dialogue:true, customLine:'', design:{cursorType:'theatre',cursorMotion:true,autoFlip:true,paddingX:16,paddingY:11,maxWidth:220,minWidth:0,radius:23,fontSize:13,reveal:'typing',revealMs:850,turnStyle:'rotate',turnMs:180,placements:{left:{x:25,y:28,ax:0,ay:0,angle:0,corner:'tl'},right:{x:-8,y:-5,ax:1,ay:1,angle:90,corner:'br'},up:{x:25,y:28,ax:0,ay:0,angle:45,corner:'tl'},down:{x:25,y:-8,ax:0,ay:1,angle:225,corner:'bl'}}}};
       this.progress = 0; this.playing = false; this._last = 0;
       this.reduced = matchMedia('(prefers-reduced-motion: reduce)');
       this.shadowRoot.innerHTML = `<style>
@@ -470,12 +470,36 @@ That artwork remains under Apache-2.0, reproduced below.
       if(!['theatre','white-arrow','help-pointer','drag-link'].includes(this.settings.design.cursorType||'theatre'))angle=0;
       body.style.transform=`rotate(${angle}deg) scaleX(${scale})`;body.style.opacity=opacity;
     }
-    layoutDialogue(actor,dir,x,y,fromDir=null,amount=1){
+    layoutDialogue(actor,dir,x,y,fromDir=null,amount=1,message=null){
       const d=this.settings.design,bubble=actor.querySelector('.bubble');
       const eased=this.reduced.matches||d.turnStyle==='snap'?1:smooth(clamp(amount));
       bubble.style.padding=[d.padding?.top??d.paddingY,d.padding?.right??d.paddingX,d.padding?.bottom??d.paddingY,d.padding?.left??d.paddingX].map(v=>`${v}px`).join(' ');bubble.style.maxWidth=`${Math.min(d.maxWidth,this.clientWidth-16)}px`;
       bubble.style.minWidth=`${Math.min(d.minWidth,d.maxWidth,this.clientWidth-16)}px`;bubble.style.fontSize=`${d.fontSize}px`;
-      const {width:w,height:h}=bubble.getBoundingClientRect();
+      // Layout dimensions stay in stage coordinates even when a slide is CSS-scaled.
+      const w=bubble.offsetWidth,h=bubble.offsetHeight;
+      if(message && d.autoFlip!==false){
+        const size=`${this.clientWidth},${this.clientHeight},${w},${h},${bubble._text},${JSON.stringify(d.placements[message.dir||dir])}`;
+        if(!actor._dialogueFit || actor._dialogueFit.key!==message.key || actor._dialogueFit.size!==size){
+          const base=d.placements[message.dir||dir];
+          const candidates=[{...base,angle:base.angle??this.directionAngle(message.dir||dir)}];
+          const horizontal=p=>({...p,x:28-p.x,ax:1-p.ax,angle:(90-p.angle+360)%360,corner:({tl:'tr',tr:'tl',bl:'br',br:'bl'})[p.corner??(p.ax?'br':'tl')]});
+          const vertical=p=>({...p,y:28-p.y,ay:1-p.ay,angle:(270-p.angle+360)%360,corner:({tl:'bl',bl:'tl',tr:'br',br:'tr'})[p.corner??(p.ax?'br':'tl')]});
+          candidates.push(horizontal(candidates[0]),vertical(candidates[0]),vertical(horizontal(candidates[0])));
+          const overflow=p=>{
+            const left=message.x+p.x-p.ax*w,top=message.y+p.y-p.ay*h;
+            return Math.max(0,8-left)+Math.max(0,left+w+8-this.clientWidth)+Math.max(0,8-top)+Math.max(0,top+h+8-this.clientHeight);
+          };
+          const placement=candidates.reduce((best,p)=>overflow(p)<overflow(best)?p:best);
+          actor._dialogueFit={key:message.key,size,placement};
+        }
+        const p=actor._dialogueFit.placement;
+        this.applyTurn(actor.querySelector('.body'),p.angle,p.angle,1);
+        bubble.style.left=`${clamp(p.x-p.ax*w,8-x,Math.max(8,this.clientWidth-8-w)-x)}px`;
+        bubble.style.top=`${clamp(p.y-p.ay*h,8-y,Math.max(8,this.clientHeight-8-h)-y)}px`;
+        bubble.style.borderRadius=['tl','tr','br','bl'].map(c=>`${c===(p.corner??(p.ax?'br':'tl'))?0:d.radius}px`).join(' ');
+        return;
+      }
+      actor._dialogueFit=null;
       const place=direction=>{const p=d.placements[direction];return {x:p.x-p.ax*w,y:p.y-p.ay*h}};
       let p=place(dir);if(fromDir){const a=place(fromDir);p={x:mix(a.x,p.x,eased),y:mix(a.y,p.y,eased)}}
       p.x=clamp(p.x,8-x,this.clientWidth-8-x-w);p.y=clamp(p.y,8-y,this.clientHeight-8-y-h);
@@ -495,7 +519,7 @@ That artwork remains under Apache-2.0, reproduced below.
       this.applyTurn(actor.querySelector('.body'),this.directionAngle(q.from||q.direction),this.directionAngle(q.direction),q.turnProgress??1);
       if(q.pressed&&['openhand','closedhand'].includes(this.settings.design.cursorType))this.updateCursor(actor.querySelector('.body'),'closedhand');
       const b=actor.querySelector('.bubble');this.writeDialogue(b,[0,1,0,q.text],q.progress,0);b.dataset.show=!!q.text;
-      this.layoutDialogue(actor,q.direction,x,y,q.from,q.turnProgress??1);
+      this.layoutDialogue(actor,q.direction,x,y,q.from,q.turnProgress??1,q.text?{key:`inspection:${q.direction}:${q.text}`,x,y,dir:q.direction}:null);
       if(q.compare && (q.turnProgress??1)===1){
         const other={left:'right',right:'left',up:'down',down:'up'}[q.direction],ghost=this.actors[1],horizontal=q.direction==='left'||q.direction==='right';
         ghost.hidden=false;ghost.classList.add('comparison');
@@ -554,7 +578,8 @@ That artwork remains under Apache-2.0, reproduced below.
       bubble.setAttribute('aria-label',state.text);bubble.dataset.typing=state.typing;
       bubble._letters.forEach((span,n)=>{
         const amount=state.visibility[n]||0;
-        span.style.display=n<state.count?'inline-block':'none';
+        // Reserve the full message footprint before revealing the first glyph.
+        span.style.display='inline-block';
         span.style.opacity=amount;
         span.style.transform=`translateY(${(1-amount)*(this.settings.design.reveal==='fade'?0:2)}px)`;
       });
@@ -581,7 +606,9 @@ That artwork remains under Apache-2.0, reproduced below.
         const bubble=actor.querySelector('.bubble'),line=scene.lines.find(l=>l[2]===i&&t>=l[0]&&t<=l[1]);
         this.writeDialogue(bubble,line,t,i);
         bubble.dataset.show=!!line&&this.settings.dialogue;
-        this.layoutDialogue(actor,turn.toDir,x,y,turn.fromDir,turn.u);
+        const start=line?this.position(keys,line[0],i):null;
+        const message=line&&this.settings.dialogue?{key:line,x:start.x*w+this.shake(line[0]).x,y:start.y*h+this.shake(line[0]).y,dir:this.turnState(line[0],i).toDir}:null;
+        this.layoutDialogue(actor,turn.toDir,x,y,turn.fromDir,turn.u,message);
         actor.querySelector('.accent').style.opacity=0;
         if(this.settings.scene==='agreement'){
           const attention=smooth(clamp((t-.53)/.10))*(1-smooth(clamp((t-.86)/.10)));
