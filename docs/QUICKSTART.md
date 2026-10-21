@@ -12,6 +12,8 @@ Choose the integration that fits the app:
 - Plain HTML: copy `src/cursor-theatre.js` into the project's public assets and load it once with a script tag.
 - A bundled client app: install the local checkout (`npm install /path/to/cursor-kit`) and import `createCursor` from `@nabilkaz/cursor-kit` in client-side code.
 
+Keep the license comments in the component when copying or bundling it. Project code is MIT; the Liveblocks pointer retains Apache-2.0 attribution.
+
 For plain HTML:
 
 ```html
@@ -35,7 +37,7 @@ Use `configure({customLine:'...'})` to replace the first cursor's dialogue. The 
 
 The container must have an explicit height of at least 240px. Coordinates and seek progress are normalized from 0 to 1. `seek()` does not pause playback: call `pause()` first for scrubbing. `moveTo()` starts direct movement; call `stopDirect()` when ending that interaction. Remove the element during framework cleanup to stop animation and observers. Import only in the browser; the engine uses DOM APIs.
 
-Use the host app's font through `--cursor-font`. Timeless belongs to the demo UI and is not a library dependency. Keep important instructions available as normal page text, not solely in the animated bubble.
+Use the host app's font through `--cursor-font`. System fonts are the default; no font assets are required. Keep important instructions available as normal page text, not solely in the animated bubble.
 
 ## Verify before finishing
 

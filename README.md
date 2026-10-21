@@ -30,18 +30,16 @@ cursor.play();
 
 Give the container an explicit height (at least 240px). Import in client-side code. See [API.md](docs/API.md) for cleanup, direct movement, scrubbing, and custom scene data. The existing `<cursor-theatre>` name remains compatible with editor exports.
 
-## Timeless
+## Fonts
 
-Get the family from https://timeless.co and run:
-
-```sh
-npm run fonts -- /path/to/Timeless-Type-Family-1.094
-```
-
-The UI uses Timeless Sans Grotesk, with a system-font fallback. Font files stay local and ignored by Git. The reusable component inherits the font you assign through `--cursor-font`. See [third-party notices](THIRD_PARTY_NOTICES.md).
+The library and editors use system fonts. No font download or setup is required. Customize the reusable component with `--cursor-font` to match your app.
 
 ## Status
 
 Private preview. Not published to npm, and no public website deployment is configured. The package is marked private to prevent accidental registry publication. Native macOS cursor artwork is excluded; bundled SVG shapes and the attributed Liveblocks pointer are available. No API key or hosted AI service is needed: “AI first” means the integration contract is Markdown your coding agent can use directly.
 
-`npm test` checks engine behavior and reveal timing. `npm run build` regenerates the studio from the canonical source. Project code remains all rights reserved until a release license is selected.
+`npm test` checks engine behavior and reveal timing. `npm run build` regenerates the studio from the canonical source. 
+
+## License
+
+Project code is licensed under [MIT](LICENSE), allowing personal and commercial use, modification, and redistribution with the license notice retained. The Liveblocks pointer retains its Apache-2.0 license; see [third-party notices](THIRD_PARTY_NOTICES.md). Repository visibility remains private.

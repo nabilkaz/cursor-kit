@@ -49,4 +49,4 @@ Use the Scene Editor for paths, nodes, timing, and dialogue. Export produces a s
 - `facing` optionally contains two arrays of `[time, angle]`; it changes orientation independently of travel.
 - Include `title`, `caption`, `mood`, and four `beats`. Keep keyframe times ordered and duration positive.
 
-Use `play()` for custom data; `playMoment()` uses built-in preset ranges. Timeless is opt-in UI styling, not embedded in exported scene files. The font of exported performances defaults to the host system unless the host supplies `--cursor-font` and its own licensed font loading.
+Use `play()` for custom data; `playMoment()` uses built-in preset ranges. The font of exported performances defaults to the host system unless the host supplies `--cursor-font` and its own licensed font loading.
