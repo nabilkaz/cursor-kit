@@ -38,7 +38,7 @@ The library and editors use system fonts. No font download or setup is required.
 
 Private preview. Not published to npm, and no public website deployment is configured. The package is marked private to prevent accidental registry publication. Native macOS cursor artwork is excluded; bundled SVG shapes and the attributed Liveblocks pointer are available. No API key or hosted AI service is needed: “AI first” means the integration contract is Markdown your coding agent can use directly.
 
-`npm test` checks engine behavior and reveal timing. `npm run build` regenerates the studio from the canonical source. 
+`npm test` checks engine behavior and reveal timing. `npm run build` regenerates the studio from the canonical source.
 
 ## License
 
