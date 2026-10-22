@@ -134,6 +134,6 @@ dialogueHit.onclick=()=>{
 new ResizeObserver(()=>draw()).observe($('stage'));
 
 sync();
-</script></html>
+</script><script>if(new URLSearchParams(location.search).has("feedback")){const s=document.createElement("script");s.src="../assets/feedback.js";s.defer=true;document.head.append(s)}</script></html>
 
 <script src="tools-ui.js?v=22"></script>
