@@ -27,9 +27,16 @@ showPose();
 const loops=['guide','celebrate'].map(get);
 const onscreen=new Set();
 const HOLD_MS=1800;
+// assets/hero.js borrows the demo cursors for a moment; loops wait until they are back.
+let crowdActive=false;
+document.addEventListener('cursor-crowd',({detail})=>{
+ crowdActive=!!detail;
+ if(crowdActive)actors.forEach(a=>clearTimeout(a.loopTimer));
+ else loops.forEach(a=>{if(onscreen.has(a)&&!a.playing&&a.progress>=1)queueReplay(a);});
+});
 function queueReplay(actor){
  clearTimeout(actor.loopTimer);
- if(!onscreen.has(actor)||document.hidden)return;
+ if(crowdActive||!onscreen.has(actor)||document.hidden)return;
  actor.loopTimer=setTimeout(()=>{
   if(!onscreen.has(actor)||document.hidden)return;
   if(actor===get('celebrate'))setMood(moodIndex+1);
@@ -64,10 +71,10 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=
  finally{button.disabled=false;}
 });
 const visibility=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
- if(isIntersecting){onscreen.add(target);if(loops.includes(target)&&!target.playing)target.replay();}
+ if(isIntersecting){onscreen.add(target);if(!crowdActive&&loops.includes(target)&&!target.playing)target.replay();}
  else{onscreen.delete(target);clearTimeout(target.loopTimer);target.pause();target.stopDirect();}
 }));actors.forEach(a=>visibility.observe(a));
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden)actors.forEach(a=>{clearTimeout(a.loopTimer);a.pause();a.stopDirect();});
- else loops.forEach(a=>{if(onscreen.has(a)&&!a.playing)a.replay();});
+ else if(!crowdActive)loops.forEach(a=>{if(onscreen.has(a)&&!a.playing)a.replay();});
 });

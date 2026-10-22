@@ -271,7 +271,7 @@ That artwork remains under Apache-2.0, reproduced below.
         *{box-sizing:border-box}.world{position:absolute;inset:0;overflow:hidden}.paths{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.path{fill:none;stroke:#749263;stroke-width:1.3;stroke-dasharray:4 7;opacity:.45}.path.second{stroke:#8271b3}
         .actor{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}.body{position:absolute;width:28px;height:28px;transform-origin:14px 14px;filter:drop-shadow(0 3px 1px #19221420)}
         .body[data-cursor=theatre]{filter:none}.body svg{overflow:visible;width:100%;height:100%}
-        .bubble{position:absolute;top:28px;left:25px;background:var(--actor);color:#25313a;padding:11px 16px;border-radius:0 23px 23px 23px;box-shadow:0 2px 5px #26351f12;white-space:normal;overflow-wrap:anywhere;width:max-content;font-size:13px;line-height:1.4;font-weight:500;opacity:0;max-width:185px;text-align:left;pointer-events:none}.bubble[data-show=true]{opacity:1}.bubble .letter{display:inline-block;white-space:pre;will-change:opacity,transform}.bubble .word{display:inline-block;white-space:normal;max-width:100%}
+        .bubble{position:absolute;top:28px;left:25px;background:var(--actor);color:#25313a;padding:11px 16px;border-radius:0 23px 23px 23px;box-shadow:0 2px 5px #26351f12;white-space:normal;overflow-wrap:anywhere;width:max-content;font-size:13px;line-height:1.4;font-weight:500;opacity:0;max-width:185px;text-align:left;pointer-events:none;transition:background-color 180ms,color 180ms}.bubble[data-show=true]{opacity:1}.bubble .letter{display:inline-block;white-space:pre;will-change:opacity,transform}.bubble .word{display:inline-block;white-space:normal;max-width:100%}
         .comparison{pointer-events:none;opacity:.75}.comparison .body{filter:none}.comparison .arrow{fill:none;stroke:#8b4c9c;stroke-width:1}.comparison .bubble{background:transparent;box-shadow:none;outline:1px dashed #8b4c9c}.comparison .bubble .word{visibility:hidden}
         .cursor-art{position:absolute;left:14px;top:14px;transform:translate(-50%,-50%);pointer-events:none}.body[data-cursor=theatre] .cursor-art{display:none}.body[data-cursor]:not([data-cursor=theatre])>svg .arrow{visibility:hidden}.cursor-art{visibility:visible}.body[data-greeting=true] .cursor-art{visibility:hidden}.cursor-art svg{width:100%;height:100%}.sprite-window{overflow:hidden}.sprite-window img{display:block;max-width:none}.sprite-strip{animation:cursor-frames var(--cycle) steps(var(--frames)) infinite}.cursor-art[data-animation=spin]>svg{animation:cursor-spin 1s linear infinite}.cursor-art[data-animation=hourglass] .glass{transform-origin:14px 14px;animation:glass-turn 2.4s ease-in-out infinite}.sand-top{transform-origin:14px 12px;animation:sand-drain 2.4s linear infinite}.sand-bottom{transform-origin:14px 22px;animation:sand-fill 2.4s linear infinite}.cursor-art[data-motion=false] *{animation-play-state:paused!important}.comparison .cursor-art{opacity:.5}
         @keyframes cursor-frames{to{transform:translateY(-100%)}}@keyframes cursor-spin{to{transform:rotate(360deg)}}@keyframes glass-turn{0%,76%{transform:rotate(0)}100%{transform:rotate(180deg)}}@keyframes sand-drain{0%{transform:scaleY(1)}75%,100%{transform:scaleY(0)}}@keyframes sand-fill{0%{transform:scaleY(0)}75%,100%{transform:scaleY(1)}}@media(prefers-reduced-motion:reduce){.cursor-art *{animation:none!important}}
@@ -468,13 +468,14 @@ That artwork remains under Apache-2.0, reproduced below.
       }else if(mode==='fold'){angle=u<.5?from:to;scale=Math.max(.03,Math.abs(1-2*e))}
       else if(mode==='dissolve'){angle=u<.5?from:to;opacity=Math.abs(1-2*e)}
       if(!['theatre','white-arrow','help-pointer','drag-link'].includes(this.settings.design.cursorType||'theatre'))angle=0;
-      body.style.transform=`rotate(${angle}deg) scaleX(${scale})`;body.style.opacity=opacity;
+      body.style.transform=`rotate(${angle}deg) scaleX(${scale})`;body.style.opacity=opacity;body._angle=angle;
     }
     layoutDialogue(actor,dir,x,y,fromDir=null,amount=1,message=null){
       const d=this.settings.design,bubble=actor.querySelector('.bubble');
       const eased=this.reduced.matches||d.turnStyle==='snap'?1:smooth(clamp(amount));
       bubble.style.padding=[d.padding?.top??d.paddingY,d.padding?.right??d.paddingX,d.padding?.bottom??d.paddingY,d.padding?.left??d.paddingX].map(v=>`${v}px`).join(' ');bubble.style.maxWidth=`${Math.min(d.maxWidth,this.clientWidth-16)}px`;
       bubble.style.minWidth=`${Math.min(d.minWidth,d.maxWidth,this.clientWidth-16)}px`;bubble.style.fontSize=`${d.fontSize}px`;
+      bubble.style.background=d.bubbleBackground||'';bubble.style.color=d.bubbleColor||'';bubble.style.fontWeight=d.fontWeight||'';
       // Layout dimensions stay in stage coordinates even when a slide is CSS-scaled.
       const w=bubble.offsetWidth,h=bubble.offsetHeight;
       if(message && d.autoFlip!==false){
@@ -492,8 +493,8 @@ That artwork remains under Apache-2.0, reproduced below.
           const placement=candidates.reduce((best,p)=>overflow(p)<overflow(best)?p:best);
           actor._dialogueFit={key:message.key,size,placement};
         }
-        const p=actor._dialogueFit.placement;
-        this.applyTurn(actor.querySelector('.body'),p.angle,p.angle,1);
+        const p=actor._dialogueFit.placement,angle=this._inspection?.angle??p.angle;
+        this.applyTurn(actor.querySelector('.body'),angle,angle,1);
         bubble.style.left=`${clamp(p.x-p.ax*w,8-x,Math.max(8,this.clientWidth-8-w)-x)}px`;
         bubble.style.top=`${clamp(p.y-p.ay*h,8-y,Math.max(8,this.clientHeight-8-h)-y)}px`;
         bubble.style.borderRadius=['tl','tr','br','bl'].map(c=>`${c===(p.corner??(p.ax?'br':'tl'))?0:d.radius}px`).join(' ');
@@ -508,6 +509,14 @@ That artwork remains under Apache-2.0, reproduced below.
       const corner=cornerFor(dir),oldCorner=cornerFor(fromDir||dir);
       bubble.style.borderRadius=['tl','tr','br','bl'].map(c=>`${mix(c===oldCorner?0:r,c===corner?0:r,eased)}px`).join(' ');
     }
+    cursorPositions(){
+      // Viewport-space anchors of the visible cursors, for hosts that mirror them elsewhere.
+      return this.actors.map((actor,index)=>{
+        if(actor.hidden||actor.classList.contains('comparison'))return null;
+        const body=actor.querySelector('.body'),r=actor.getBoundingClientRect();
+        return {index,x:r.left,y:r.top,width:body.offsetWidth,height:body.offsetHeight,angle:body._angle??0,accent:actor.style.getPropertyValue('--actor').trim(),cursorType:body.dataset.cursor||'theatre'};
+      }).filter(Boolean);
+    }
     inspect(options){this.pause();this.stopDirect();this._inspection={direction:'left',text:'Hey. What are we making?',progress:1,x:.5,y:.5,...options};this.render()}
     renderInspection(){
       this.shadowRoot.querySelector('.world').setAttribute('aria-label',`Cursor anatomy preview. ${this._inspection.direction} facing. ${this._inspection.text}`);
@@ -516,7 +525,8 @@ That artwork remains under Apache-2.0, reproduced below.
       this.actors[1].hidden=true;actor.classList.remove('comparison');actor.hidden=false;this.paths.forEach(p=>p.style.display='none');
       actor.style.transform=`translate(${x}px,${y}px)`;
       actor.querySelector('.arrow').style.display='';actor.querySelector('.dot').style.display='none';actor.querySelector('.body').dataset.greeting='false';
-      this.applyTurn(actor.querySelector('.body'),this.directionAngle(q.from||q.direction),this.directionAngle(q.direction),q.turnProgress??1);
+      actor.style.setProperty('--actor',q.accent||'#c5c4df');
+      this.applyTurn(actor.querySelector('.body'),q.angle??this.directionAngle(q.from||q.direction),q.angle??this.directionAngle(q.direction),q.turnProgress??1);
       if(q.pressed&&['openhand','closedhand'].includes(this.settings.design.cursorType))this.updateCursor(actor.querySelector('.body'),'closedhand');
       const b=actor.querySelector('.bubble');this.writeDialogue(b,[0,1,0,q.text],q.progress,0);b.dataset.show=!!q.text;
       this.layoutDialogue(actor,q.direction,x,y,q.from,q.turnProgress??1,q.text?{key:`inspection:${q.direction}:${q.text}`,x,y,dir:q.direction}:null);
@@ -576,12 +586,14 @@ That artwork remains under Apache-2.0, reproduced below.
         }
       }
       bubble.setAttribute('aria-label',state.text);bubble.dataset.typing=state.typing;
+      const wobble=this._inspection?.wobble;
       bubble._letters.forEach((span,n)=>{
         const amount=state.visibility[n]||0;
         // Reserve the full message footprint before revealing the first glyph.
         span.style.display='inline-block';
         span.style.opacity=amount;
-        span.style.transform=`translateY(${(1-amount)*(this.settings.design.reveal==='fade'?0:2)}px)`;
+        const w=wobble?Math.sin(wobble.phase+n*2.3):0;
+        span.style.transform=`translateY(${(1-amount)*(this.settings.design.reveal==='fade'?0:2)+w*(wobble?.y||0)}px) rotate(${w*(wobble?.deg||0)}deg)`;
       });
 
     }
