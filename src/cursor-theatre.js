@@ -263,7 +263,7 @@ That artwork remains under Apache-2.0, reproduced below.
     constructor() {
       super();
       this.attachShadow({mode:'open'});
-      this.settings = {scene:'switch', speed:1, energy:1, arc:1, trails:false, dialogue:true, customLine:'', design:{cursorType:'theatre',cursorMotion:true,autoFlip:true,paddingX:16,paddingY:11,maxWidth:220,minWidth:0,radius:23,fontSize:13,reveal:'typing',revealMs:850,turnStyle:'rotate',turnMs:180,placements:{left:{x:25,y:28,ax:0,ay:0,angle:0,corner:'tl'},right:{x:-8,y:-5,ax:1,ay:1,angle:90,corner:'br'},up:{x:25,y:28,ax:0,ay:0,angle:45,corner:'tl'},down:{x:25,y:-8,ax:0,ay:1,angle:225,corner:'bl'}}}};
+      this.settings = {scene:'switch', speed:1, energy:1, arc:1, trails:false, dialogue:true, customLine:'', design:{cursorType:'theatre',cursorMotion:true,autoFlip:true,paddingX:16,paddingY:11,maxWidth:220,minWidth:0,radius:23,fontSize:13,reveal:'typing',revealMs:850,turnStyle:'rotate',turnMs:180,placements:{left:{x:25,y:28,ax:0,ay:0,angle:0,corner:'tl'},right:{x:3,y:28,ax:1,ay:0,angle:90,corner:'tr'},up:{x:14,y:30,ax:0,ay:0,angle:45,corner:'tl'},down:{x:14,y:-2,ax:0,ay:1,angle:225,corner:'bl'}}}};
       this.progress = 0; this.playing = false; this._last = 0;
       this.reduced = matchMedia('(prefers-reduced-motion: reduce)');
       this.shadowRoot.innerHTML = `<style>

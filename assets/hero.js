@@ -6,17 +6,16 @@
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const demos=[...document.querySelectorAll('.examples cursor-theatre')];
  const CORAL='#ef777b',INK='#381416',LINES=['Hey.','Hi again.','Okay, I felt that.','Please.','I have friends.','BACKUP!'];
- const STOPS=[.63,.42,.78,.54],HEAD_START=650,RETURN_AT=4400,DONE_AT=5900;
+ const HEAD_START=650,RETURN_AT=4400,DONE_AT=5900;
  // The crowd: the demo cursors take the inner ring; the flood fills rings further out.
  const FLOOD=40,NEAR=130,FLOOD_BY=1400,POUR_MS=25;
- const PALETTE=['#c5c4df','#bbd5d7','#cfdcb7','#f0cdb8','#efe0a9','#ecc6dc','#bfd2ea','#f3b9b4','#111','#111'];
  const design={fontSize:12,paddingX:10,paddingY:7,radius:12,maxWidth:145,reveal:'typing',revealMs:480,placements:{left:{x:21,y:21,ax:0,ay:0,angle:0,corner:'tl'},right:{x:7,y:21,ax:1,ay:0,angle:90,corner:'tr'}}};
  actor.configure({design});
  const overlay=document.createElement('div');overlay.className='hero-crowd';overlay.setAttribute('aria-hidden','true');
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),ease=t=>1-Math.pow(1-clamp(t,0,1),3),rand=(a,b)=>a+Math.random()*(b-a);
  const shortest=(to,from)=>((to-from+540)%360)-180;
 
- let x=0,y=8,from={x,y},to={x,y},moveStart=0,nextMove=0,stop=0,visible=true;
+ let x=0,y=8,rest={x,y},restUntil=0,wander=null,waypoint=null,remarkAt=0,lastRemark=-1e9,visible=true;
  let message='',said=-1e9,facing='left',greetUntil=0,clicks=0,lastClick=-1e9,shakeAt=-1e9;
  let party=-1,followers=[],flooded=false,center={x:0,y:0},prevCenter=null,vel={x:0,y:0},pointer=null,trackPointer=false;
  let clock=0,last=0,raf=0,designKey='';
@@ -27,7 +26,24 @@
   // Choose the side with room for the whole bubble now, and keep it for the message.
   const W=region.clientWidth;facing=x+21+width+8>W?'right':'left';
  }
- function move(px){from={x,y};to={x:clamp(px,16,region.clientWidth-36),y:6+(stop%3)*10};moveStart=clock;nextMove=clock+3500}
+ // Places in the intro's whitespace worth drifting to, measured from the live text so they track wrapping.
+ function waypoints(){
+  const R=region.getBoundingClientRect(),W=region.clientWidth,H=region.clientHeight,list=[{x:W*.58,y:6,line:null}];
+  const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return [...r.getClientRects()].filter(b=>b.width>0)};
+  const at=(x,y,line)=>{if(x>8&&x<W-40&&y>0&&y<H-40)list.push({x,y,line})};
+  const q=s=>document.querySelector(s),eyebrow=q('.intro .eyebrow'),h1=q('.intro h1'),p=q('.intro>p:not(.eyebrow):not(.fine)'),actions=q('.intro-actions');
+  if(eyebrow){const b=lines(eyebrow).at(-1);if(b)at(b.right-R.left+26,b.top-R.top-8,'True.')}
+  if(h1)lines(h1).forEach((b,i)=>at(b.right-R.left+22,b.top-R.top+(i?14:10),i?null:'Big words.'));
+  if(p){const b=lines(p).at(-1);if(b)at(b.right-R.left+22,b.top-R.top-4,'I can do all that.')}
+  if(actions){const b=actions.getBoundingClientRect();at(b.right-R.left+30,b.top-R.top+2,'For your agent. Nice.')}
+  return list;
+ }
+ function depart(){
+  const list=waypoints(),choices=list.filter(w=>!waypoint||Math.hypot(w.x-waypoint.x,w.y-waypoint.y)>40);
+  waypoint=choices[Math.floor(Math.random()*choices.length)]||list[0];
+  wander={from:{x,y},to:{x:waypoint.x,y:waypoint.y},start:clock,duration:2600+Math.random()*1000,bob:(Math.random()<.5?-1:1)*8};
+ }
+ function settle(){rest={x,y};wander=null;restUntil=clock+2200}
  function calm(){clicks=0;shakeAt=-1e9}
  function greet(){if(party>=0||clock<greetUntil)return;greetUntil=clock+2500;say(annoyed()?'Easy there.':'Oh, hi.',80)}
 
@@ -41,11 +57,12 @@
   return f;
  }
  function proxy(){
-  const el=document.createElement('cursor-theatre');el.setAttribute('aria-hidden','true');
+  // Visible from the first frame, so a demo cursor is replaced in place and never blinks out.
+  const el=document.createElement('cursor-theatre');el.setAttribute('aria-hidden','true');el.style.opacity='1';
   el.configure({design:{...design,maxWidth:170}});overlay.append(el);return el;
  }
  function floodCursor(fill){
-  const el=document.createElement('div');el.className='flood-cursor';
+  const el=document.createElement('div');el.className='flood-cursor';el.style.opacity='1';
   el.innerHTML=window.CursorTheatre.pointerMarkup(fill);overlay.append(el);return el;
  }
  function releaseFlood(age){
@@ -57,8 +74,7 @@
     // Each newcomer starts just outside the viewport, in its own direction, and keeps that exit for later.
     const a=Math.random()*Math.PI*2;
     const entry={x:clamp(center.x+Math.cos(a)*far,-60,W+60),y:clamp(center.y+Math.sin(a)*far,-60,H+60)};
-    const fill=PALETTE[Math.floor(Math.random()*PALETTE.length)];
-    followers.push(body({kind:'flood',el:floodCursor(fill),x:entry.x,y:entry.y,entry,angle:rand(0,360),scale:rand(.78,1.18),
+    followers.push(body({kind:'flood',el:floodCursor('#111'),x:entry.x,y:entry.y,entry,angle:rand(0,360),scale:rand(.78,1.18),
      phase:k/cap*Math.PI*2+rand(0,.5),radius:radius+rand(-9,9),spin,breath,period:rand(.2,.26)+.045*ring,zeta:rand(.7,.95),
      startAge:age+n*POUR_MS,leaveAt:RETURN_AT+300+n*12},ring,n));
    }
@@ -95,7 +111,7 @@
   followers.forEach(f=>f.el.remove());followers=[];flooded=false;overlay.remove();party=-1;
   demos.forEach(demo=>{demo.style.visibility='';if(demo._wasPlaying)demo.play();demo._wasPlaying=false});
   document.dispatchEvent(new CustomEvent('cursor-crowd',{detail:false}));
-  calm();greetUntil=clock+1800;nextMove=clock+2200;
+  calm();greetUntil=clock+1800;settle();remarkAt=0;
   if(thank)say('Thank you.',70);else{message='';said=-1e9}
  }
 
@@ -105,7 +121,7 @@
   if(party>=0)return;
   if(clock-lastClick>5000)clicks=0;
   lastClick=clock;clicks++;greetUntil=clock+2400;
-  from={x,y};to={x,y};moveStart=clock;nextMove=clock+2200;
+  settle();remarkAt=0;
   shakeAt=clicks>=3?clock:-1e9;
   say(LINES[clicks-1],clicks>=6?210:130);
   if(clicks>=6)summon(event);
@@ -172,7 +188,6 @@
     const heading=own>1?Math.atan2(f.vy,f.vx)*180/Math.PI+135:toPointer;
     const desired=toPointer+shortest(heading,toPointer)*swim;
     f.angle+=shortest(desired,f.angle)*(still?1:1-Math.exp(-dt/90));
-    f.el.style.opacity='1';
    }
    if(f.kind==='native'){
     const speaking=i===0&&age>900&&age<4100;
@@ -189,15 +204,28 @@
    clock+=dt;
    const idle=party<0;
    if(idle&&clicks&&clock-lastClick>6000)calm();
-   if(idle&&!reduced.matches&&clock>=nextMove)move(STOPS[stop++%STOPS.length]*region.clientWidth);
-   const u=ease((clock-moveStart)/750);
-   x=from.x+(to.x-from.x)*u;y=from.y+(to.y-from.y)*u-(reduced.matches||from.x===to.x?0:Math.sin(u*Math.PI)*8);
+   // Idle: drift slowly between places in the intro, rest a while, now and then say something about what is nearby.
+   let sx=0,sy=0;
+   if(idle&&!reduced.matches){
+    if(wander){
+     const u=clamp((clock-wander.start)/wander.duration,0,1),e=u*u*(3-2*u);
+     x=wander.from.x+(wander.to.x-wander.from.x)*e;y=wander.from.y+(wander.to.y-wander.from.y)*e+Math.sin(u*Math.PI)*wander.bob;
+     if(u>=1){
+      rest={x,y};wander=null;restUntil=clock+1800+Math.random()*1400;
+      if(waypoint.line&&!clicks&&clock-lastRemark>9000&&clock-said>2600&&Math.random()<.6)remarkAt=clock+350;
+     }
+    }else{
+     x=rest.x;y=rest.y;sx=Math.sin(clock*.0011)*2.5;sy=Math.sin(clock*.0017)*1.8;
+     if(clock>=restUntil)depart();
+    }
+    if(remarkAt&&clock>=remarkAt){remarkAt=0;lastRemark=clock;say(waypoint.line,130)}
+   }
    const shakeAge=clock-shakeAt;
    const shake=idle&&!reduced.matches&&shakeAge<500?Math.sin(shakeAge*.075)*4*(1-shakeAge/500):0;
-   renderHero(x+shake,y);
+   renderHero(x+shake+sx,y+sy);
    if(!idle)renderCrowd(dt);
   }catch(error){finish(false);cancelAnimationFrame(raf);throw error}
  }
- x=region.clientWidth*.58;from={x,y};to={x,y};nextMove=2200;
+ x=region.clientWidth*.58;rest={x,y};restUntil=2200;
  raf=requestAnimationFrame(frame);
 })();

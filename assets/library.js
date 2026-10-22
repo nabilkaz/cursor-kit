@@ -7,10 +7,9 @@ const moods=[
  {scene:'frustrated',title:'Let it vent',text:'A real mouse-shake when something will not work.',recipe:"Trigger scene:'frustrated' when an action fails or stalls. Keep the real error message in place and let the cursor carry the mood."},
  {scene:'elated',title:'Yes, that worked',text:'A delighted shake, then back to work.',recipe:"Trigger scene:'elated' after a small success that does not need a full celebration."},
  {scene:'shy',title:'Say a quiet hello',text:'A quick peek, a pause, then a small commitment.',recipe:"Trigger scene:'shy' the first time a feature appears. Keep it brief and never block the interface."},
- {scene:'mischief',title:'Tease a little',text:'A pause, a quick chase, an innocent-looking stop.',recipe:"Trigger scene:'mischief' for a playful beat, such as an empty state or a hidden feature."},
  {scene:'agreement',title:'Find the same page',text:'An echo becomes a shared gesture.',recipe:"Trigger scene:'agreement' when two sides confirm the same thing, such as a shared decision or a synced state."}
 ];
-let moodIndex=0;
+let moodIndex=0,steppedMood=false;
 function setMood(index){
  moodIndex=(index+moods.length)%moods.length;
  const mood=moods[moodIndex];
@@ -20,8 +19,17 @@ function setMood(index){
 }
 get('celebrate').configure({scene:moods[0].scene});get('celebrate').seek(.9);
 get('move').configure({scene:'entrance',dialogue:false});get('move').seek(1);
-let facing='left';
-function showPose(){get('turn').inspect({direction:facing,text:'A different angle.',progress:1,progressMode:'reveal'});}
+const facings=['left','right','up','down'];let facingIndex=0,turnRaf=0;
+function showPose(from){
+ cancelAnimationFrame(turnRaf);
+ const direction=facings[facingIndex],start=performance.now();
+ const draw=now=>{
+  const u=from?Math.min(1,(now-start)/220):1;
+  get('turn').inspect({direction,from:u<1?from:undefined,turnProgress:u,text:'A different angle.',progress:1,progressMode:'reveal'});
+  if(u<1)turnRaf=requestAnimationFrame(draw);
+ };
+ draw(start);
+}
 showPose();
 // The scene demos loop while on screen: hold the final frame, then replay.
 const loops=['guide','celebrate'].map(get);
@@ -39,7 +47,7 @@ function queueReplay(actor){
  if(crowdActive||!onscreen.has(actor)||document.hidden)return;
  actor.loopTimer=setTimeout(()=>{
   if(!onscreen.has(actor)||document.hidden)return;
-  if(actor===get('celebrate'))setMood(moodIndex+1);
+  if(actor===get('celebrate')&&!steppedMood)setMood(moodIndex+1);
   actor.replay();
  },HOLD_MS);
 }
@@ -49,7 +57,8 @@ loops.forEach(actor=>actor.addEventListener('playstate',({detail:playing})=>{
 }));
 document.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>get(b.dataset.play).replay());
 document.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>get('move').moveTo(Number(b.dataset.target),.5));
-get('turn-button').onclick=()=>{facing=facing==='left'?'right':'left';showPose();};
+document.querySelectorAll('[data-turn]').forEach(b=>b.onclick=()=>{const from=facings[facingIndex];facingIndex=(facingIndex+Number(b.dataset.turn)+facings.length)%facings.length;showPose(from);});
+document.querySelectorAll('[data-mood]').forEach(b=>b.onclick=()=>{steppedMood=true;clearTimeout(get('celebrate').loopTimer);setMood(moodIndex+Number(b.dataset.mood));get('celebrate').replay();});
 const recipes={
  guide:"Add an introduction on the appropriate user action. Configure scene:'entrance' and customLine:'Start here.'. Use the app's own message if a better one is provided.",
  move:"Use actor.moveTo(x,y) to demonstrate movement between two targets. Convert target centers into normalized coordinates inside the actor's container. End direct movement with stopDirect().",
