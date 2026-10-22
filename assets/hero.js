@@ -8,7 +8,9 @@
  const CORAL='#ef777b',INK='#381416',LINES=['Hey.','Hi again.','Okay, I felt that.','Please stop.','I have friends.','BACKUP!'];
  // What the crowd says once it arrives: [speaker, from ms, to ms, line]. Speakers are the demo cursors, in order.
  const CHORUS=[[0,900,2600,"You messin' with our guy?"],[1,1500,3100,'Not cool.'],[2,2200,3800,'We saw that.'],[3,2900,4300,'Easy, pal.'],[4,3500,4300,"He's with us."]];
- const HEAD_START=650,RETURN_AT=4400,DONE_AT=5900;
+ // After the shout: a beat of stillness, then each demo cursor snaps round to look at the shouter, holds the
+ // stare, and only then takes off. The head start covers that whole listening beat.
+ const HEAD_START=1000,HEAR_AT=220,HEAR_GAP=70,RETURN_AT=4400,DONE_AT=5900;
  // The crowd: the demo cursors take the inner ring; the flood fills rings further out.
  const FLOOD=40,NEAR=130,FLOOD_BY=1400,POUR_MS=25;
  const design={fontSize:12,paddingX:10,paddingY:7,radius:12,maxWidth:145,reveal:'typing',revealMs:480,placements:{left:{x:21,y:21,ax:0,ay:0,angle:0,corner:'tl'},right:{x:7,y:21,ax:1,ay:0,angle:90,corner:'tr'}}};
@@ -28,24 +30,29 @@
   // Choose the side with room for the whole bubble now, and keep it for the message.
   const W=region.clientWidth;facing=x+21+width+8>W?'right':'left';
  }
- // Places in the intro's whitespace worth drifting to, measured from the live text so they track wrapping.
+ // Places worth visiting, measured from the live layout so they track wrapping: beside the headline lines and
+ // the description, up close on each action (an inspection), and just above the examples to point the way.
  function waypoints(){
-  const R=region.getBoundingClientRect(),W=region.clientWidth,H=region.clientHeight,list=[{x:W*.58,y:6,line:null}];
+  const R=region.getBoundingClientRect(),W=region.clientWidth,H=region.clientHeight,list=[];
   const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return [...r.getClientRects()].filter(b=>b.width>0)};
-  const at=(x,y,line)=>{if(x>8&&x<W-40&&y>0&&y<H-40)list.push({x,y,line})};
-  const q=s=>document.querySelector(s),eyebrow=q('.intro .eyebrow'),h1=q('.intro h1'),p=q('.intro>p:not(.eyebrow):not(.fine)'),actions=q('.intro-actions');
-  if(eyebrow){const b=lines(eyebrow).at(-1);if(b)at(b.right-R.left+26,b.top-R.top-8,'True.')}
+  const at=(x,y,line,extra)=>{if(x>8&&x<W-40&&y>0&&y<H-40)list.push({x,y,line,...extra})};
+  const q=s=>document.querySelector(s),h1=q('.intro h1'),p=q('.intro>p:not(.eyebrow):not(.fine)'),examples=q('.examples');
   if(h1)lines(h1).forEach((b,i)=>at(b.right-R.left+22,b.top-R.top+(i?14:10),i?null:'Big words.'));
   if(p){const b=lines(p).at(-1);if(b)at(b.right-R.left+22,b.top-R.top-4,'I can do all that.')}
-  if(actions){const b=actions.getBoundingClientRect();at(b.right-R.left+30,b.top-R.top+2,'For your agent. Nice.')}
-  return list;
+  document.querySelectorAll('.intro-actions button,.intro-actions a').forEach((el,i)=>{
+   const b=el.getBoundingClientRect();at(b.right-R.left-11,b.bottom-R.top-9,i?'Worth a read.':'For your agent. Nice.',{inspect:true,always:true});
+  });
+  if(examples){const b=examples.getBoundingClientRect();at(b.left-R.left+b.width/2-14,Math.min(H-66,b.top-R.top-66),'Oh cool. Check these out.',{always:true})}
+  return list.length?list:[{x:W*.58,y:8,line:null}];
  }
  function depart(){
   const list=waypoints(),choices=list.filter(w=>!waypoint||Math.hypot(w.x-waypoint.x,w.y-waypoint.y)>40);
   waypoint=choices[Math.floor(Math.random()*choices.length)]||list[0];
   wander={from:{x,y},to:{x:waypoint.x,y:waypoint.y},start:clock,duration:1100+Math.random()*700,bob:(Math.random()<.5?-1:1)*(10+Math.random()*8)};
+  // While it hovers a real control, step out of the way so that control stays clickable.
+  if(waypoint.inspect)hit.style.pointerEvents='none';
  }
- function settle(){rest={x,y};wander=null;act=null;queue=[];restUntil=clock+2200}
+ function settle(){rest={x,y};wander=null;act=null;queue=[];restUntil=clock+2200;hit.style.pointerEvents=''}
  const inOut=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,out=u=>1-Math.pow(1-u,3);
  // The entrance: zoom up beside the first headline line, nod to it, lap the second line, then go exploring.
  function opening(){
@@ -102,7 +109,7 @@
     const entry={x:clamp(center.x+Math.cos(a)*far,-60,W+60),y:clamp(center.y+Math.sin(a)*far,-60,H+60)};
     followers.push(body({kind:'flood',el:floodCursor('#111'),x:entry.x,y:entry.y,entry,angle:rand(0,360),scale:rand(.78,1.18),
      phase:k/cap*Math.PI*2+rand(0,.5),radius:radius+rand(-9,9),spin,breath,period:rand(.2,.26)+.045*ring,zeta:rand(.7,.95),
-     startAge:age+n*POUR_MS,leaveAt:RETURN_AT+300+n*12},ring,n));
+     startAge:age+n*POUR_MS,leaveAt:RETURN_AT+300+n*12,launched:false},ring,n));
    }
    ring++;
   }
@@ -123,7 +130,7 @@
    states.forEach(state=>{
     const i=followers.length;
     followers.push(body({kind:'native',el:proxy(),demo,index:state.index,accent:state.accent,x:state.x,y:state.y,angle:state.angle,scale:1,
-     phase:i*Math.PI/3,radius:52+(i%3)*6,spin:.00048,breath:9,period:rand(.17,.23),zeta:rand(.78,.92),startAge:i*45,leaveAt:RETURN_AT+i*40,
+     phase:i*Math.PI/3,radius:52+(i%3)*6,spin:.00048,breath:9,period:rand(.17,.23),zeta:rand(.78,.92),startAge:i*45,leaveAt:RETURN_AT+i*40,hearAt:HEAR_AT+i*HEAR_GAP,launched:false,
      home:()=>demo.cursorPositions().find(s=>s.index===state.index)||state},0,i));
    });
    demo.style.visibility='hidden';
@@ -179,8 +186,16 @@
    const near=followers.some(f=>f.kind==='native'&&Math.hypot(f.x+14-center.x,f.y+14-center.y)<NEAR);
    if(near||age>FLOOD_BY){flooded=true;releaseFlood(age)}
   }
-  const still=reduced.matches;
+  const still=reduced.matches,sinceShout=clock-party;
+  // The shouter's position on screen, for the crowd to look at.
+  const rr=region.getBoundingClientRect(),shouter={x:rr.left+x+14,y:rr.top+y+14};
   followers.forEach((f,i)=>{
+   if(f.kind==='native'&&age<f.startAge){
+    // Heard it: snap round toward the shout, then hold the stare until it is time to go.
+    if(sinceShout>=f.hearAt){const look=Math.atan2(shouter.y-(f.y+14),shouter.x-(f.x+14))*180/Math.PI+135;f.angle+=shortest(look,f.angle)*(still?1:1-Math.exp(-dt/55))}
+    f.el.inspect({x:f.x/W,y:f.y/H,angle:f.angle,accent:f.accent,direction:'left',text:'',progress:1,progressMode:'reveal'});
+    return;
+   }
    const a=f.phase+(still?0:age*f.spin+Math.sin(age*f.wf+f.wp)*f.wa);
    const radius=f.radius+(still?0:Math.sin(age*.002+i*1.7)*f.breath);
    // Slot: a point on the ring around an anchor that leads the pointer a little and trails behind it at speed.
@@ -198,6 +213,8 @@
    }else if(age>=f.startAge){
     if(still){f.x=tx;f.y=ty}
     else{
+     // Take off with a burst toward the pointer, so the departure reads as a decision, not a drift.
+     if(!f.launched){f.launched=true;const d=Math.hypot(tx-f.x,ty-f.y)||1;f.vx=(tx-f.x)/d*(f.kind==='native'?1100:700);f.vy=(ty-f.y)/d*(f.kind==='native'?1100:700)}
      // The nearer a follower is to the pointer, the stiffer its spring: the inner school snaps, the edges drift.
      const near=1-clamp(Math.hypot(f.x+14-center.x,f.y+14-center.y)/260,0,1);
      const k=f.k*(.75+.6*near),c=f.c*(.9+.3*near);
@@ -244,9 +261,12 @@
     }else if(wander){
      const u=clamp((clock-wander.start)/wander.duration,0,1),e=inOut(u);
      x=wander.from.x+(wander.to.x-wander.from.x)*e;y=wander.from.y+(wander.to.y-wander.from.y)*e+Math.sin(u*Math.PI)*wander.bob;
+     if(!waypoint.inspect&&u>.4)hit.style.pointerEvents='';
      if(u>=1){
       rest={x,y};wander=null;restUntil=clock+800+Math.random()*1200;
-      if(waypoint.line&&!clicks&&clock-lastRemark>8000&&clock-said>2600&&Math.random()<.65)remarkAt=clock+300;
+      if(waypoint.inspect){queue=[{kind:'nod',times:1,duration:420}];next()}
+      const gap=clock-lastRemark,want=waypoint.always?gap>4500:gap>8000&&Math.random()<.65;
+      if(waypoint.line&&!clicks&&want&&clock-said>2600)remarkAt=clock+(waypoint.inspect?450:300);
      }
     }else{
      x=rest.x;y=rest.y;sx=Math.sin(clock*.0016)*3;sy=Math.sin(clock*.0023)*2.2;
