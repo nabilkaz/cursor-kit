@@ -1,23 +1,24 @@
 // A small cursor lives above the headline. Click it enough and it calls the demo cursors for backup,
-// and once they close in, a flood of others pours in from off screen.
+// and once they close in, a whole school of others pours in from off screen.
 (() => {
  const region=document.getElementById('hero-playground'),actor=document.getElementById('hero-cursor'),hit=document.getElementById('hero-greet');
  if(!region||!actor||!hit||typeof actor.inspect!=='function'||typeof actor.cursorPositions!=='function')return;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const demos=[...document.querySelectorAll('.examples cursor-theatre')];
  const CORAL='#ef777b',INK='#381416',LINES=['Hey.','Hi again.','Okay, I felt that.','Please.','I have friends.','BACKUP!'];
- const STOPS=[.63,.42,.78,.54],HEAD_START=650,RETURN_AT=4400,DONE_AT=5700;
- // The crowd: the demo cursors take the inner ring, then the flood fills three outer rings.
- const CROWD_SIZE=20,NEAR=130,FLOOD_BY=1400,ACCENTS=['#c5c4df','#bbd5d7'];
- const RINGS=[{radius:95,cap:7,spin:-.00036,breath:11},{radius:140,cap:9,spin:.00028,breath:13},{radius:185,cap:12,spin:-.00022,breath:14}];
+ const STOPS=[.63,.42,.78,.54],HEAD_START=650,RETURN_AT=4400,DONE_AT=5900;
+ // The crowd: the demo cursors take the inner ring; the flood fills rings further out.
+ const FLOOD=40,NEAR=130,FLOOD_BY=1400,POUR_MS=25;
+ const PALETTE=['#c5c4df','#bbd5d7','#cfdcb7','#f0cdb8','#efe0a9','#ecc6dc','#bfd2ea','#f3b9b4','#111','#111'];
  const design={fontSize:12,paddingX:10,paddingY:7,radius:12,maxWidth:145,reveal:'typing',revealMs:480,placements:{left:{x:21,y:21,ax:0,ay:0,angle:0,corner:'tl'},right:{x:7,y:21,ax:1,ay:0,angle:90,corner:'tr'}}};
  actor.configure({design});
  const overlay=document.createElement('div');overlay.className='hero-crowd';overlay.setAttribute('aria-hidden','true');
- const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),ease=t=>1-Math.pow(1-clamp(t,0,1),3);
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),ease=t=>1-Math.pow(1-clamp(t,0,1),3),rand=(a,b)=>a+Math.random()*(b-a);
+ const shortest=(to,from)=>((to-from+540)%360)-180;
 
  let x=0,y=8,from={x,y},to={x,y},moveStart=0,nextMove=0,stop=0,visible=true;
  let message='',said=-1e9,facing='left',greetUntil=0,clicks=0,lastClick=-1e9,shakeAt=-1e9;
- let party=-1,followers=[],flooded=false,center={x:0,y:0},pointer=null,trackPointer=false;
+ let party=-1,followers=[],flooded=false,center={x:0,y:0},prevCenter=null,vel={x:0,y:0},pointer=null,trackPointer=false;
  let clock=0,last=0,raf=0,designKey='';
 
  const annoyed=()=>clicks>=3;
@@ -30,23 +31,39 @@
  function calm(){clicks=0;shakeAt=-1e9}
  function greet(){if(party>=0||clock<greetUntil)return;greetUntil=clock+2500;say(annoyed()?'Easy there.':'Oh, hi.',80)}
 
+ // Every follower is a small spring chasing a slot around the pointer. Its own period, damping,
+ // wobble and trail are what make the school feel like many creatures instead of one shape.
+ function body(f,ring,i){
+  const period=f.period;
+  f.k=Math.pow(2*Math.PI/period,2);f.c=2*f.zeta*Math.sqrt(f.k);
+  f.vx=0;f.vy=0;f.ring=ring;f.wf=rand(.0015,.003);f.wp=rand(0,Math.PI*2);f.wa=rand(.12,.3);
+  f.trail=ring*14+rand(-6,6);f.lead=ring?0:.03;
+  return f;
+ }
  function proxy(){
   const el=document.createElement('cursor-theatre');el.setAttribute('aria-hidden','true');
   el.configure({design:{...design,maxWidth:170}});overlay.append(el);return el;
  }
+ function floodCursor(fill){
+  const el=document.createElement('div');el.className='flood-cursor';
+  el.innerHTML=window.CursorTheatre.pointerMarkup(fill);overlay.append(el);return el;
+ }
  function releaseFlood(age){
   const W=overlay.clientWidth||innerWidth,H=overlay.clientHeight||innerHeight,far=Math.hypot(W,H)+80;
-  let n=0;const count=Math.max(0,CROWD_SIZE-followers.length);
-  RINGS.forEach(ring=>{
-   for(let k=0;k<ring.cap&&n<count;k++,n++){
+  let n=0,ring=1;
+  while(n<FLOOD){
+   const radius=92+42*(ring-1),cap=8+3*(ring-1),spin=(ring%2?-1:1)*(.00042-.00004*ring),breath=10+2*ring;
+   for(let k=0;k<cap&&n<FLOOD;k++,n++){
     // Each newcomer starts just outside the viewport, in its own direction, and keeps that exit for later.
-    const a=Math.random()*Math.PI*2,i=followers.length;
+    const a=Math.random()*Math.PI*2;
     const entry={x:clamp(center.x+Math.cos(a)*far,-60,W+60),y:clamp(center.y+Math.sin(a)*far,-60,H+60)};
-    followers.push({kind:'flood',el:proxy(),accent:ACCENTS[i%ACCENTS.length],x:entry.x,y:entry.y,entry,angle:0,
-     phase:k/ring.cap*Math.PI*2+Math.random()*.4,radius:ring.radius+(Math.random()-.5)*12,spin:ring.spin,breath:ring.breath,
-     response:120+Math.random()*100,startAge:age+n*35});
+    const fill=PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    followers.push(body({kind:'flood',el:floodCursor(fill),x:entry.x,y:entry.y,entry,angle:rand(0,360),scale:rand(.78,1.18),
+     phase:k/cap*Math.PI*2+rand(0,.5),radius:radius+rand(-9,9),spin,breath,period:rand(.2,.26)+.045*ring,zeta:rand(.7,.95),
+     startAge:age+n*POUR_MS,leaveAt:RETURN_AT+300+n*12},ring,n));
    }
-  });
+   ring++;
+  }
  }
  function summon(event){
   const keyboard=event.detail===0,touch=event.pointerType==='touch';
@@ -54,6 +71,7 @@
   if(touch){center={x:event.clientX,y:event.clientY};trackPointer=false}
   else if(keyboard){center=pointer?{...pointer}:trigger;trackPointer=!!pointer}
   else{center={x:event.clientX,y:event.clientY};trackPointer=true}
+  prevCenter=null;vel={x:0,y:0};
   document.dispatchEvent(new CustomEvent('cursor-crowd',{detail:true}));
   followers=[];flooded=false;
   demos.forEach(demo=>{
@@ -62,8 +80,9 @@
    demo._wasPlaying=demo.playing;demo.pause();demo.stopDirect();
    states.forEach(state=>{
     const i=followers.length;
-    followers.push({kind:'native',el:proxy(),demo,index:state.index,accent:state.accent,x:state.x,y:state.y,angle:state.angle,
-     phase:i*Math.PI/3,radius:52+(i%3)*6,spin:.00048,breath:9,response:110+i*17,startAge:i*45,home:()=>demo.cursorPositions().find(s=>s.index===state.index)||state});
+    followers.push(body({kind:'native',el:proxy(),demo,index:state.index,accent:state.accent,x:state.x,y:state.y,angle:state.angle,scale:1,
+     phase:i*Math.PI/3,radius:52+(i%3)*6,spin:.00048,breath:9,period:rand(.17,.23),zeta:rand(.78,.92),startAge:i*45,leaveAt:RETURN_AT+i*40,
+     home:()=>demo.cursorPositions().find(s=>s.index===state.index)||state},0,i));
    });
    demo.style.visibility='hidden';
   });
@@ -110,33 +129,55 @@
  }
  function renderCrowd(dt){
   const age=clock-party-HEAD_START,W=overlay.clientWidth||innerWidth,H=overlay.clientHeight||innerHeight;
+  // Pointer velocity, smoothed, so the school can lean into the motion and trail behind it.
+  if(prevCenter&&dt>0){const s=dt/1000,k=1-Math.exp(-dt/60);vel.x+=((center.x-prevCenter.x)/s-vel.x)*k;vel.y+=((center.y-prevCenter.y)/s-vel.y)*k}
+  prevCenter={...center};
+  const speed=Math.hypot(vel.x,vel.y),dir=speed>1?{x:vel.x/speed,y:vel.y/speed}:{x:0,y:0},stretch=Math.min(speed,1500)/1500;
   if(!flooded&&age>=0){
    const near=followers.some(f=>f.kind==='native'&&Math.hypot(f.x+14-center.x,f.y+14-center.y)<NEAR);
    if(near||age>FLOOD_BY){flooded=true;releaseFlood(age)}
   }
+  const still=reduced.matches;
   followers.forEach((f,i)=>{
-   const a=f.phase+(reduced.matches?0:age*f.spin);
-   const radius=f.radius+(reduced.matches?0:Math.sin(age*.002+i*1.7)*f.breath);
-   const tx=clamp(center.x+Math.cos(a)*radius-14,2,W-30),ty=clamp(center.y+Math.sin(a)*radius*.78-14,2,H-30);
-   const leave=ease((age-RETURN_AT-i*40)/500);
+   const a=f.phase+(still?0:age*f.spin+Math.sin(age*f.wf+f.wp)*f.wa);
+   const radius=f.radius+(still?0:Math.sin(age*.002+i*1.7)*f.breath);
+   // Slot: a point on the ring around an anchor that leads the pointer a little and trails behind it at speed.
+   const ax=center.x+vel.x*f.lead-dir.x*stretch*f.trail,ay=center.y+vel.y*f.lead-dir.y*stretch*f.trail;
+   const tx=clamp(ax+Math.cos(a)*radius-14,2,W-30),ty=clamp(ay+Math.sin(a)*radius*.78-14,2,H-30);
+   const leave=ease((age-f.leaveAt)/500);
    if(leave>0){
     // Ease away from wherever the follower was when called back: natives land exactly on their
     // originals, the flood slips back out the way it came.
     if(!f.leaveFrom)f.leaveFrom={x:f.x,y:f.y,angle:f.angle};
     const home=f.kind==='native'?f.home():f.entry;
     f.x=f.leaveFrom.x+(home.x-f.leaveFrom.x)*leave;f.y=f.leaveFrom.y+(home.y-f.leaveFrom.y)*leave;
-    if(f.kind==='native')f.angle=f.leaveFrom.angle+(((home.angle-f.leaveFrom.angle+540)%360)-180)*leave;
+    if(f.kind==='native')f.angle=f.leaveFrom.angle+shortest(home.angle,f.leaveFrom.angle)*leave;
     else f.el.style.opacity=String(1-leave);
    }else if(age>=f.startAge){
-    const follow=reduced.matches?1:1-Math.exp(-dt/f.response);
-    f.x+=(tx-f.x)*follow;f.y+=(ty-f.y)*follow;
-    const desired=Math.atan2(center.y-(f.y+14),center.x-(f.x+14))*180/Math.PI+135;
-    const delta=((desired-f.angle+540)%360)-180;
-    f.angle+=delta*follow;
+    if(still){f.x=tx;f.y=ty}
+    else{
+     // The nearer a follower is to the pointer, the stiffer its spring: the inner school snaps, the edges drift.
+     const near=1-clamp(Math.hypot(f.x+14-center.x,f.y+14-center.y)/260,0,1);
+     const k=f.k*(.75+.6*near),c=f.c*(.9+.3*near);
+     let rest=dt/1000;
+     while(rest>0){
+      const h=Math.min(rest,.008);rest-=h;
+      f.vx+=(k*(tx-f.x)-c*f.vx)*h;f.vy+=(k*(ty-f.y)-c*f.vy)*h;
+      f.x+=f.vx*h;f.y+=f.vy*h;
+     }
+    }
+    // Face the way it swims; settle to facing the pointer when it rests.
+    const own=Math.hypot(f.vx,f.vy),swim=clamp((own-40)/160,0,1);
+    const toPointer=Math.atan2(center.y-(f.y+14),center.x-(f.x+14))*180/Math.PI+135;
+    const heading=own>1?Math.atan2(f.vy,f.vx)*180/Math.PI+135:toPointer;
+    const desired=toPointer+shortest(heading,toPointer)*swim;
+    f.angle+=shortest(desired,f.angle)*(still?1:1-Math.exp(-dt/90));
     f.el.style.opacity='1';
    }
-   const speaking=f.kind==='native'&&i===0&&age>900&&age<4100;
-   f.el.inspect({x:f.x/W,y:f.y/H,angle:f.angle,accent:f.accent,direction:Math.cos(a)<0?'right':'left',text:speaking?'Just checking on you.':'',progress:reduced.matches?1:clamp((age-900)/480,0,1),progressMode:'reveal'});
+   if(f.kind==='native'){
+    const speaking=i===0&&age>900&&age<4100;
+    f.el.inspect({x:f.x/W,y:f.y/H,angle:f.angle,accent:f.accent,direction:Math.cos(a)<0?'right':'left',text:speaking?'Just checking on you.':'',progress:still?1:clamp((age-900)/480,0,1),progressMode:'reveal'});
+   }else f.el.style.transform=`translate(${f.x}px,${f.y}px) rotate(${f.angle}deg) scale(${f.scale})`;
   });
   if(age>DONE_AT)finish(true);
  }

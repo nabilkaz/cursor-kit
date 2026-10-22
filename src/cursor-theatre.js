@@ -640,6 +640,8 @@ That artwork remains under Apache-2.0, reproduced below.
       this.dispatchEvent(new CustomEvent('frame',{detail:{progress:t,duration:scene.duration/this.settings.speed,beat:scene.beats[Math.min(3,Math.floor(t*4))]}}));
     }
   }
-  window.CursorTheatre={scenes};
+  // The default pointer as standalone markup, for hosts that draw extra pointers outside an actor.
+  const pointerMarkup=(fill='#111')=>`<svg viewBox="0 0 28 28" aria-hidden="true"><path d="m.088 1.75 11.25 29.422c.409 1.07 1.908 1.113 2.377.067l5.223-11.653c.13-.288.36-.518.648-.648l11.653-5.223c1.046-.47 1.004-1.968-.067-2.377L1.75.088C.71-.31-.31.71.088 1.75Z" transform="translate(3 3) scale(.625)" fill="${fill}" stroke="white" stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+  window.CursorTheatre={scenes,pointerMarkup};
   if(!customElements.get('cursor-theatre'))customElements.define('cursor-theatre',CursorTheatre);
 })();

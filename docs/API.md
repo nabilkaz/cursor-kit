@@ -25,6 +25,7 @@ Import inside a client-only lifecycle when using server rendering. For example, 
 | `moveTo(x, y)` | Move toward normalized stage coordinates with velocity continuity. |
 | `stopDirect()` | Stop direct movement. |
 | `inspect(options)` | Preview one cursor's pose and dialogue, as in the designer. |
+| `CursorTheatre.pointerMarkup(fill)` (global) | The default pointer as SVG markup, for drawing extra pointers outside an actor. |
 | `cursorPositions()` | Viewport-space anchors of the visible cursors (`x`, `y`, `width`, `height`, `angle`, `accent`, `cursorType`), for hosts that mirror them in another layer. |
 | `remove()` | Standard DOM removal; stops clocks and disconnects observers. |
 
