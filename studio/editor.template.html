@@ -61,7 +61,7 @@ try{const saved=JSON.parse(localStorage.getItem('cursor-design'));if(saved)theat
 const requested=new URLSearchParams(location.search).get('scene');
 select(sceneMeta[requested]?requested:'switch');if(sceneMeta[requested])theatre.play();else theatre.seek(.17);
 </script>
-</body></html>
+<script>if(new URLSearchParams(location.search).has("feedback")){const s=document.createElement("script");s.src="../assets/feedback.js";s.defer=true;document.head.append(s)}</script></body></html>
 
 <script src="tools-ui.js?v=11"></script>
 

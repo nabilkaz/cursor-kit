@@ -5,6 +5,7 @@ export interface Design {
   cursorType?:string; cursorMotion?:boolean; autoFlip?:boolean; reveal?:'typing'|'words'|'fade'; revealMs?:number;
   turnStyle?:'snap'|'rotate'|'fold'|'dissolve'; turnMs?:number;
   paddingX?:number; paddingY?:number; maxWidth?:number; minWidth?:number; radius?:number; fontSize?:number;
+  bubbleBackground?:string; bubbleColor?:string; fontWeight?:number|string;
   placements?:Partial<Record<Direction, Placement>>;
 }
 export interface SceneDefinition {
@@ -20,10 +21,13 @@ export interface Options {
 export interface Inspection {
   direction?:Direction; text?:string; progress?:number; progressMode?:'reveal';
   x?:number; y?:number; from?:Direction; turnProgress?:number; compare?:boolean;
+  angle?:number; accent?:string; wobble?:{y:number;deg:number;phase:number}|null;
 }
+export interface CursorPosition { index:0|1; x:number; y:number; width:number; height:number; angle:number; accent:string; cursorType:string }
 export interface CursorActor extends HTMLElement {
   configure(options?:Options):this; play():void; pause():void; replay():void; playMoment():void;
   seek(progress:number):void; moveTo(x:number,y:number):void; stopDirect():void; inspect(options:Inspection):void;
+  cursorPositions():CursorPosition[];
   progress:number; playing:boolean; readonly scene:SceneDefinition;
   readonly cursorTypes:ReadonlyArray<{id:string;label:string;source:string}>;
 }

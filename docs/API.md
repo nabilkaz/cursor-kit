@@ -25,15 +25,17 @@ Import inside a client-only lifecycle when using server rendering. For example, 
 | `moveTo(x, y)` | Move toward normalized stage coordinates with velocity continuity. |
 | `stopDirect()` | Stop direct movement. |
 | `inspect(options)` | Preview one cursor's pose and dialogue, as in the designer. |
+| `CursorTheatre.pointerMarkup(fill)` (global) | The default pointer as SVG markup, for drawing extra pointers outside an actor. |
+| `cursorPositions()` | Viewport-space anchors of the visible cursors (`x`, `y`, `width`, `height`, `angle`, `accent`, `cursorType`), for hosts that mirror them in another layer. |
 | `remove()` | Standard DOM removal; stops clocks and disconnects observers. |
 
-`configure` accepts `scene`, `speed` (0.25–2), `arc` (0–2), `energy` (0–2), `trails`, `dialogue`, `customLine`, `design`, and `sceneEdits`. Supported design fields and placement coordinates are in `src/index.d.ts`. `actor.cursorTypes` gives the actual bundled catalog; unsupported saved types fall back to the default pointer.
+`configure` accepts `scene`, `speed` (0.25–2), `arc` (0–2), `energy` (0–2), `trails`, `dialogue`, `customLine`, `design`, and `sceneEdits`. `design.bubbleBackground`, `design.bubbleColor` and `design.fontWeight` restyle the bubble; leave them unset for the default colours. Supported design fields and placement coordinates are in `src/index.d.ts`. `actor.cursorTypes` gives the actual bundled catalog; unsupported saved types fall back to the default pointer.
 
 Events are dispatched on the element: `frame` has `{progress, duration, beat}` (duration accounts for speed); `playstate` has a boolean detail. Listen directly on the actor. Pause offscreen using IntersectionObserver and on `document.hidden` if the surrounding application can leave a demonstration mounted in the background.
 
 ## Text and orientation
 
-`design.reveal` is `typing`, `words`, or `fade`; `revealMs` controls its duration. `inspect({text, progress, progressMode:'reveal'})` maps normalized progress to exactly that reveal duration. Without `progressMode:'reveal'`, inspection uses the legacy 2400ms clock. Orientation is separate from stage position: `direction` chooses the pose; `x` and `y` choose the stage location.
+`design.reveal` is `typing`, `words`, or `fade`; `revealMs` controls its duration. `inspect({text, progress, progressMode:'reveal'})` maps normalized progress to exactly that reveal duration. Without `progressMode:'reveal'`, inspection uses the legacy 2400ms clock. Orientation is separate from stage position: `direction` chooses the pose; `x` and `y` choose the stage location. `angle` overrides the pose rotation in degrees (the bubble still fits to `direction`), `accent` recolours the cursor, and `wobble: {y, deg, phase}` adds a per-letter wave to the dialogue.
 
 ```js
 actor.configure({design:{reveal:'words',revealMs:700}});
