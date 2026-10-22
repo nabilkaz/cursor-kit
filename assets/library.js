@@ -6,6 +6,19 @@ get('move').configure({scene:'entrance',dialogue:false});get('move').seek(1);
 let facing='left';
 function showPose(){get('turn').inspect({direction:facing,text:'A different angle.',progress:1,progressMode:'reveal'});}
 showPose();
+// The scene demos loop while on screen: hold the final frame, then replay.
+const loops=['guide','celebrate'].map(get);
+const onscreen=new Set();
+const HOLD_MS=1800;
+function queueReplay(actor){
+ clearTimeout(actor.loopTimer);
+ if(!onscreen.has(actor)||document.hidden)return;
+ actor.loopTimer=setTimeout(()=>{if(onscreen.has(actor)&&!document.hidden)actor.replay();},HOLD_MS);
+}
+loops.forEach(actor=>actor.addEventListener('playstate',({detail:playing})=>{
+ if(playing)clearTimeout(actor.loopTimer);
+ else if(actor.progress>=1)queueReplay(actor);
+}));
 document.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>get(b.dataset.play).replay());
 document.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>get('move').moveTo(Number(b.dataset.target),.5));
 get('turn-button').onclick=()=>{facing=facing==='left'?'right':'left';showPose();};
@@ -29,5 +42,11 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=
  }catch{notify('Could not load the brief. Open “Read the integration brief” to copy it.');}
  finally{button.disabled=false;}
 });
-const visibility=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{if(!isIntersecting){target.pause();target.stopDirect();}}));actors.forEach(a=>visibility.observe(a));
-document.addEventListener('visibilitychange',()=>{if(document.hidden)actors.forEach(a=>{a.pause();a.stopDirect();});});
+const visibility=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
+ if(isIntersecting){onscreen.add(target);if(loops.includes(target)&&!target.playing)target.replay();}
+ else{onscreen.delete(target);clearTimeout(target.loopTimer);target.pause();target.stopDirect();}
+}));actors.forEach(a=>visibility.observe(a));
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden)actors.forEach(a=>{clearTimeout(a.loopTimer);a.pause();a.stopDirect();});
+ else loops.forEach(a=>{if(onscreen.has(a)&&!a.playing)a.replay();});
+});
