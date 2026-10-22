@@ -64,7 +64,12 @@ const recipes={
  move:"Use actor.moveTo(x,y) to demonstrate movement between two targets. Convert target centers into normalized coordinates inside the actor's container. End direct movement with stopDirect().",
  turn:"Use actor.inspect({direction:'right',text:'A different angle.',progress:1,progressMode:'reveal'}) to preview cursor orientation and dialogue together. Keep x and y for stage position separate from direction."
 };
-let statusTimer;
+let statusTimer,copiedTimer;
+// The primary button confirms in place: the copy icon becomes a check and the label reads Copied for a moment.
+function copied(button){
+ const label=button.querySelector('.label');button.style.minWidth=button.offsetWidth+'px';button.dataset.state='copied';label.textContent='Copied';
+ clearTimeout(copiedTimer);copiedTimer=setTimeout(()=>{delete button.dataset.state;label.textContent='Copy Markdown';button.style.minWidth='';},1600);
+}
 function notify(text){get('status').textContent=text;clearTimeout(statusTimer);statusTimer=setTimeout(()=>get('status').textContent='',3000);}
 document.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=>{
  button.disabled=true;
@@ -74,9 +79,12 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=
   const base=await response.text();
   const recipe=button.dataset.copy==='celebrate'?moods[moodIndex].recipe:recipes[button.dataset.copy];
   const text=base+(recipe?'\n\n## Requested moment\n\n'+recipe+'\n':'');
-  try{await navigator.clipboard.writeText(text);notify('Markdown copied. Ready for your coding agent.');}
+  try{
+   await navigator.clipboard.writeText(text);
+   if(button.classList.contains('primary'))copied(button);else notify('Recipe copied. Ready for your coding agent.');
+  }
   catch{get('copy-content').value=text;get('copy-dialog').showModal();get('copy-content').select();}
- }catch{notify('Could not load the brief. Open “Read the integration brief” to copy it.');}
+ }catch{notify('Could not load the brief. Try again in a moment.');}
  finally{button.disabled=false;}
 });
 const visibility=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{

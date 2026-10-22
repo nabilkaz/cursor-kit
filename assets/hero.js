@@ -40,7 +40,7 @@
   if(h1)lines(h1).forEach((b,i)=>at(b.right-R.left+22,b.top-R.top+(i?14:10),i?null:'Big words.'));
   if(p){const b=lines(p).at(-1);if(b)at(b.right-R.left+22,b.top-R.top-4,'I can do all that.')}
   document.querySelectorAll('.intro-actions button,.intro-actions a').forEach((el,i)=>{
-   const b=el.getBoundingClientRect();at(b.right-R.left-11,b.bottom-R.top-9,i?'Worth a read.':'For your agent. Nice.',{inspect:true,always:true});
+   const b=el.getBoundingClientRect();at(b.right-R.left-11,b.bottom-R.top-9,'For your agent. Nice.',{inspect:true,always:true});
   });
   if(examples){const b=examples.getBoundingClientRect();at(b.left-R.left+b.width/2-14,Math.min(H-66,b.top-R.top-66),'Oh cool. Check these out.',{always:true})}
   return list.length?list:[{x:W*.58,y:8,line:null}];
