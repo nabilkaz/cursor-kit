@@ -5,7 +5,9 @@
  if(!region||!actor||!hit||typeof actor.inspect!=='function'||typeof actor.cursorPositions!=='function')return;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const demos=[...document.querySelectorAll('.examples cursor-theatre')];
- const CORAL='#ef777b',INK='#381416',LINES=['Hey.','Hi again.','Okay, I felt that.','Please.','I have friends.','BACKUP!'];
+ const CORAL='#ef777b',INK='#381416',LINES=['Hey.','Hi again.','Okay, I felt that.','Please stop.','I have friends.','BACKUP!'];
+ // What the crowd says once it arrives: [speaker, from ms, to ms, line]. Speakers are the demo cursors, in order.
+ const CHORUS=[[0,900,2600,"You messin' with our guy?"],[1,1500,3100,'Not cool.'],[2,2200,3800,'We saw that.'],[3,2900,4300,'Easy, pal.'],[4,3500,4300,"He's with us."]];
  const HEAD_START=650,RETURN_AT=4400,DONE_AT=5900;
  // The crowd: the demo cursors take the inner ring; the flood fills rings further out.
  const FLOOD=40,NEAR=130,FLOOD_BY=1400,POUR_MS=25;
@@ -15,7 +17,7 @@
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),ease=t=>1-Math.pow(1-clamp(t,0,1),3),rand=(a,b)=>a+Math.random()*(b-a);
  const shortest=(to,from)=>((to-from+540)%360)-180;
 
- let x=0,y=8,rest={x,y},restUntil=0,wander=null,waypoint=null,remarkAt=0,lastRemark=-1e9,visible=true;
+ let x=0,y=8,rest={x,y},restUntil=0,wander=null,waypoint=null,remarkAt=0,lastRemark=-1e9,visible=true,act=null,queue=[],opened=false;
  let message='',said=-1e9,facing='left',greetUntil=0,clicks=0,lastClick=-1e9,shakeAt=-1e9;
  let party=-1,followers=[],flooded=false,center={x:0,y:0},prevCenter=null,vel={x:0,y:0},pointer=null,trackPointer=false;
  let clock=0,last=0,raf=0,designKey='';
@@ -41,9 +43,33 @@
  function depart(){
   const list=waypoints(),choices=list.filter(w=>!waypoint||Math.hypot(w.x-waypoint.x,w.y-waypoint.y)>40);
   waypoint=choices[Math.floor(Math.random()*choices.length)]||list[0];
-  wander={from:{x,y},to:{x:waypoint.x,y:waypoint.y},start:clock,duration:2600+Math.random()*1000,bob:(Math.random()<.5?-1:1)*8};
+  wander={from:{x,y},to:{x:waypoint.x,y:waypoint.y},start:clock,duration:1100+Math.random()*700,bob:(Math.random()<.5?-1:1)*(10+Math.random()*8)};
  }
- function settle(){rest={x,y};wander=null;restUntil=clock+2200}
+ function settle(){rest={x,y};wander=null;act=null;queue=[];restUntil=clock+2200}
+ const inOut=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,out=u=>1-Math.pow(1-u,3);
+ // The entrance: zoom up beside the first headline line, nod to it, lap the second line, then go exploring.
+ function opening(){
+  const R=region.getBoundingClientRect(),h1=document.querySelector('.intro h1');if(!h1)return false;
+  const r=document.createRange();r.selectNodeContents(h1);const ls=[...r.getClientRects()].filter(b=>b.width>0);if(ls.length<2)return false;
+  const l1=ls[0],l2=ls[1],W=region.clientWidth,H=region.clientHeight;
+  const beside={x:Math.min(W-40,l1.right-R.left+22),y:l1.top-R.top+10};
+  const cx=l2.left-R.left+l2.width/2,cy=l2.top-R.top+l2.height/2,rx=Math.min(l2.width/2+34,W/2-20),ry=l2.height/2+18,a0=-.55;
+  x=W*.5;y=H+30;
+  queue=[
+   {kind:'move',to:beside,duration:620,ease:out,arc:-24},
+   {kind:'nod',times:2,duration:520},
+   {kind:'hold',duration:260},
+   {kind:'move',to:{x:cx+Math.cos(a0)*rx-14,y:cy+Math.sin(a0)*ry-14},duration:260,ease:inOut,arc:0},
+   {kind:'orbit',cx,cy,rx,ry,a0,turns:1,duration:1250},
+   {kind:'hold',duration:380}
+  ];
+  next();return true;
+ }
+ function next(){
+  act=queue.shift()||null;
+  if(act){act.start=clock;if(act.kind==='move')act.from={x,y};if(act.kind==='nod'||act.kind==='hold'){act.x=x;act.y=y}}
+  else{rest={x,y};restUntil=clock+700}
+ }
  function calm(){clicks=0;shakeAt=-1e9}
  function greet(){if(party>=0||clock<greetUntil)return;greetUntil=clock+2500;say(annoyed()?'Easy there.':'Oh, hi.',80)}
 
@@ -112,7 +138,7 @@
   demos.forEach(demo=>{demo.style.visibility='';if(demo._wasPlaying)demo.play();demo._wasPlaying=false});
   document.dispatchEvent(new CustomEvent('cursor-crowd',{detail:false}));
   calm();greetUntil=clock+1800;settle();remarkAt=0;
-  if(thank)say('Thank you.',70);else{message='';said=-1e9}
+  if(thank)say('Thanks, guys.',90);else{message='';said=-1e9}
  }
 
  hit.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')greet()});
@@ -190,8 +216,8 @@
     f.angle+=shortest(desired,f.angle)*(still?1:1-Math.exp(-dt/90));
    }
    if(f.kind==='native'){
-    const speaking=i===0&&age>900&&age<4100;
-    f.el.inspect({x:f.x/W,y:f.y/H,angle:f.angle,accent:f.accent,direction:Math.cos(a)<0?'right':'left',text:speaking?'Just checking on you.':'',progress:still?1:clamp((age-900)/480,0,1),progressMode:'reveal'});
+    const line=CHORUS[i],speaking=line&&age>line[1]&&age<line[2];
+    f.el.inspect({x:f.x/W,y:f.y/H,angle:f.angle,accent:f.accent,direction:Math.cos(a)<0?'right':'left',text:speaking?line[3]:'',progress:still||!line?1:clamp((age-line[1])/480,0,1),progressMode:'reveal'});
    }else f.el.style.transform=`translate(${f.x}px,${f.y}px) rotate(${f.angle}deg) scale(${f.scale})`;
   });
   if(age>DONE_AT)finish(true);
@@ -207,15 +233,23 @@
    // Idle: drift slowly between places in the intro, rest a while, now and then say something about what is nearby.
    let sx=0,sy=0;
    if(idle&&!reduced.matches){
-    if(wander){
-     const u=clamp((clock-wander.start)/wander.duration,0,1),e=u*u*(3-2*u);
+    if(!opened){opened=true;opening()}
+    if(act){
+     const u=clamp((clock-act.start)/act.duration,0,1);
+     if(act.kind==='move'){const e=act.ease(u);x=act.from.x+(act.to.x-act.from.x)*e;y=act.from.y+(act.to.y-act.from.y)*e+Math.sin(u*Math.PI)*act.arc}
+     else if(act.kind==='nod'){x=act.x;y=act.y+Math.sin(u*Math.PI*2*act.times)*7*(1-u*.35)}
+     else if(act.kind==='orbit'){const a=act.a0+inOut(u)*Math.PI*2*act.turns;x=act.cx+Math.cos(a)*act.rx-14;y=act.cy+Math.sin(a)*act.ry-14}
+     else{x=act.x;y=act.y}
+     if(u>=1)next();
+    }else if(wander){
+     const u=clamp((clock-wander.start)/wander.duration,0,1),e=inOut(u);
      x=wander.from.x+(wander.to.x-wander.from.x)*e;y=wander.from.y+(wander.to.y-wander.from.y)*e+Math.sin(u*Math.PI)*wander.bob;
      if(u>=1){
-      rest={x,y};wander=null;restUntil=clock+1800+Math.random()*1400;
-      if(waypoint.line&&!clicks&&clock-lastRemark>9000&&clock-said>2600&&Math.random()<.6)remarkAt=clock+350;
+      rest={x,y};wander=null;restUntil=clock+800+Math.random()*1200;
+      if(waypoint.line&&!clicks&&clock-lastRemark>8000&&clock-said>2600&&Math.random()<.65)remarkAt=clock+300;
      }
     }else{
-     x=rest.x;y=rest.y;sx=Math.sin(clock*.0011)*2.5;sy=Math.sin(clock*.0017)*1.8;
+     x=rest.x;y=rest.y;sx=Math.sin(clock*.0016)*3;sy=Math.sin(clock*.0023)*2.2;
      if(clock>=restUntil)depart();
     }
     if(remarkAt&&clock>=remarkAt){remarkAt=0;lastRemark=clock;say(waypoint.line,130)}
@@ -226,6 +260,6 @@
    if(!idle)renderCrowd(dt);
   }catch(error){finish(false);cancelAnimationFrame(raf);throw error}
  }
- x=region.clientWidth*.58;rest={x,y};restUntil=2200;
+ x=region.clientWidth*.58;rest={x,y};restUntil=1200;
  raf=requestAnimationFrame(frame);
 })();
