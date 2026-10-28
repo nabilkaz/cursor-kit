@@ -1,6 +1,6 @@
-# Add Cursor Kit to this project
+# Add Cursor Theatre to this project
 
-Use Cursor Kit to add an expressive cursor demonstration to the current project. Keep the user's real mouse pointer and existing app interactions intact.
+Use Cursor Theatre to add an expressive cursor demonstration to the current project. Keep the user's real mouse pointer and existing app interactions intact.
 
 ## Bring in the library
 

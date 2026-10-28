@@ -1,4 +1,4 @@
-# Cursor Kit
+# Cursor Theatre
 
 For integration into another project, read `docs/QUICKSTART.md`; it is the copy-and-go contract. Read `docs/API.md` when using custom paths, inspection, or framework lifecycles.
 

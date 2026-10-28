@@ -1,6 +1,8 @@
-# Cursor Kit
+# Cursor Theatre
 
 Expressive cursor motion and dialogue for product demos, onboarding, and small interactive moments. A dependency-free web component, a scene editor, and a cursor designer.
+
+The package and the repository are called cursor-kit (`@nabilkaz/cursor-kit`); the project is Cursor Theatre.
 
 **For your coding agent:** copy [QUICKSTART.md](docs/QUICKSTART.md) into your project conversation. It contains the integration steps, actual API names, and checks to run. The local library UI has a **Copy Markdown** button and focused recipes.
 

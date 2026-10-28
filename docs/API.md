@@ -1,6 +1,6 @@
 # Browser API
 
-The registered element remains `<cursor-theatre>` for compatibility with the existing editors and exported scenes. Cursor Kit is the package name. The engine has no runtime dependencies and uses Shadow DOM.
+The registered element remains `<cursor-theatre>` for compatibility with the existing editors and exported scenes. The project is Cursor Theatre; the package and repository are called cursor-kit. The engine has no runtime dependencies and uses Shadow DOM.
 
 ```js
 import { createCursor } from '@nabilkaz/cursor-kit';
