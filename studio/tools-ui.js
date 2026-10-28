@@ -4,7 +4,7 @@
   const header=document.querySelector('header');
   const action=document.getElementById(designer?'save':'download');
   header.replaceChildren();
-  const brand=document.createElement('a');brand.href='../index.html';brand.className='tool-brand';brand.textContent='Cursor Kit';header.append(brand);
+  const brand=document.createElement('a');brand.href='../index.html';brand.className='tool-brand';brand.textContent='Cursor Theatre';header.append(brand);
   const nav=document.createElement('nav');nav.className='tool-nav';nav.setAttribute('aria-label','Main navigation');
   [['Overview','../index.html',false],['Scene Editor','index.html?v=tools-2',!designer],['Cursor Designer','lab.html?v=tools-2',designer]].forEach(([label,url,active])=>{const a=document.createElement('a');a.href=url;a.textContent=label;if(active)a.setAttribute('aria-current','page');nav.append(a)});header.append(nav,action);
   action.textContent=designer?'Apply to editor':'Export scene';

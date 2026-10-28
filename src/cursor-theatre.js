@@ -1,5 +1,5 @@
 /*!
-Cursor Kit project code: MIT
+Cursor Theatre project code: MIT
 
 MIT License
 
